@@ -10,6 +10,10 @@ exports.uploadSingleFile = async (file, folderName) => {
 
         const destDir = path.join(__dirname, `../public/images/${folderName}`);
 
+        if (!fs.existsSync(destDir)) {
+            fs.mkdirSync(destDir, { recursive: true });
+        }
+        
         // Đặt tên file duy nhất (tránh trùng)
         const newFileName = Date.now() + '-' + file.originalname;
         const tempPath = file.path;
@@ -19,11 +23,8 @@ exports.uploadSingleFile = async (file, folderName) => {
         fs.renameSync(tempPath, targetPath);
 
         // Trả về tên file (không phải URL đầy đủ)
-        dataRes.msg = "Upload thành công!"
-        dataRes.data = newFileName;
         return newFileName;
     } catch (error) {
         dataRes.msg = error.message;
     }
-    res.json(dataRes);
 };

@@ -34,6 +34,11 @@ exports.doReg = async (req, res, next) => {
 
         user.pass = await bcrypt.hash(req.body.pass, salt);
 
+        if (req.file) {
+            const fileName = await uploadSingleFile(req.file, 'avatars');
+            user.image = fileName; // lưu tên file vào DB
+        }
+
         const token = await userModel.makeAuthToken(user);
 
         let newUser = await user.save();
