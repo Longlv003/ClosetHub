@@ -32,3 +32,25 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# ==========================
+# Node.js Server (Express + MongoDB)
+# ==========================
+# Dependencies
+server/node_modules/
+
+# Environment variables
+server/.env
+
+# Logs
+server/npm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+server/logs/
+
+# Temporary files
+server/tmp/
+
+# Coverage / test outputs
+server/coverage/
+server/.nyc_output/
