@@ -1,12 +1,32 @@
 package com.example.closethub;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.example.closethub.adapter.ProductAdapter;
+import com.example.closethub.models.ApiResponse;
+import com.example.closethub.models.Product;
+import com.example.closethub.networks.ApiService;
+import com.example.closethub.networks.RetrofitClient;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,11 +74,53 @@ public class FavoriteFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+    private RecyclerView rcvCategory, rcvProduct;
+    private ApiService apiService = RetrofitClient.getApiService();
+    private ArrayList<Product> productArrayList;
+    private ProductAdapter productAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_favorite, container, false);
+        View view = inflater.inflate(R.layout.fragment_favorite, container, false);
+        initUI(view);
+
+        productArrayList = new ArrayList<>();
+        rcvProduct.setLayoutManager(
+                new GridLayoutManager(getContext(), 2)
+        );
+        productAdapter = new ProductAdapter(getContext(), productArrayList);
+        rcvProduct.setAdapter(productAdapter);
+
+        SharedPreferences sharedPref = getContext().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String idUser = sharedPref.getString("id_user", null);
+        String token_user = sharedPref.getString("token", null);
+
+        GetListFavorite(token_user);
+
+        return view;
+    }
+
+    private void GetListFavorite(String tokenUser) {
+        apiService.getFavoriteProducts(tokenUser).enqueue(new Callback<ApiResponse<List<Product>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<Product>>> call, Response<ApiResponse<List<Product>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    productArrayList.clear();
+                    productArrayList.addAll(response.body().getData());
+                    productAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<Product>>> call, Throwable throwable) {
+                Log.e("Error", "ProductList Error", throwable);
+            }
+        });
+    }
+
+    private void initUI (View view) {
+        //imgBack = view.findViewById(R.id.imgBack);
+        rcvProduct = view.findViewById(R.id.rcvProduct);
     }
 }

@@ -6,10 +6,10 @@ exports.addProduct = async (req, res, next) => {
     let dataRes = { msg: 'OK' };
 
     try {
-        const { name, price, qty, catID, description, createdAt } = req.body;
+        const { name, price, quantity, catID, description, createdAt } = req.body;
 
         // Kiểm tra thông tin bắt buộc
-        if (name == null || price == null || catID == null || qty == null) {
+        if (name == null || price == null || catID == null || quantity == null) {
             throw new Error("Missing required information");
         }
 
@@ -17,7 +17,7 @@ exports.addProduct = async (req, res, next) => {
         const product = new pModel({
             name,
             price,
-            qty,
+            quantity,
             catID,
             description: description || "",
             createdAt: createdAt || new Date()
@@ -46,13 +46,13 @@ exports.EditProduct = async (req, res, next) => {
         if (typeof(req.params._id) != 'undefined') {
             _id = req.params._id;
         }
-        const { name, price, qty, description} = req.body;
+        const { name, price, quantity, description} = req.body;
         
         // Tạo object update chỉ chứa những trường có giá trị
         let updateData = {};
         if (name) updateData.name = name;
         if (price) updateData.price = price;
-        if (qty) updateData.qty = qty;
+        if (quantity) updateData.quantity = quantity;
         if (description) updateData.description = description;
 
         // Nếu có file upload, thêm image
@@ -167,3 +167,94 @@ exports.GetProductByCat = async (req, res, next) => {
     
     res.json(dataRes);
 }
+
+exports.GetTopSellingProducts = async (req, res, next) => {
+    let dataRes = { msg: 'OK' };
+    
+    try {
+        // Lấy danh sách 10 sản phẩm có total_sold cao nhất
+        let list = await pModel.find()
+            .sort({ total_sold: -1 }) // Sắp xếp giảm dần theo total_sold
+            .limit(10) // Giới hạn 10 sản phẩm
+            .exec();
+
+        dataRes.data = list;
+        dataRes.total = list.length;
+        dataRes.msg = "Lấy danh sách sản phẩm bán chạy thành công";
+        
+    } catch (error) {
+        console.error('Lỗi khi lấy sản phẩm bán chạy:', error);
+        dataRes.data = null;
+        dataRes.msg = 'Lỗi server: ' + error.message;
+    }
+    
+    res.json(dataRes);
+};
+
+exports.UpdateFavorite = async (req, res, next) => {
+    let dataRes = { msg: 'OK' };
+    
+    try {
+        const { _id, is_favorite } = req.params;
+
+        // Kiểm tra id có tồn tại không
+        if (!_id) {
+            throw new Error("Thiếu thông tin sản phẩm");
+        }
+
+        // Kiểm tra is_favorite có hợp lệ không
+        if (is_favorite !== 'true' && is_favorite !== 'false') {
+            throw new Error("Trạng thái favorite không hợp lệ");
+        }
+
+        // Chuyển is_favorite từ string sang boolean
+        const isFavorite = is_favorite === 'true';
+
+        // Kiểm tra sản phẩm
+        const product = await pModel.findById(_id);
+        if (!product) {
+            throw new Error("Sản phẩm không tồn tại");
+        }
+
+        // Update favorite
+        const updatedProduct = await pModel.findByIdAndUpdate(
+            _id,
+            { 
+                $set: { 
+                    is_favorite: isFavorite 
+                } 
+            },
+            { new: true }
+        );
+
+        dataRes.data = updatedProduct;
+        dataRes.msg = isFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích";
+
+    } catch (error) {
+        console.error('UpdateFavorite Error:', error);
+        dataRes.data = null;
+        dataRes.msg = error.message;
+    }
+
+    res.json(dataRes);
+};
+
+exports.GetFavoriteProducts = async (req, res, next) => {
+    let dataRes = { msg: 'OK' };
+    
+    try {
+        // Lấy danh sách sản phẩm có is_favorite = true
+        let list = await pModel.find({ is_favorite: true }).exec();
+
+        dataRes.data = list;
+        dataRes.total = list.length;
+        dataRes.msg = "Lấy danh sách sản phẩm yêu thích thành công";
+        
+    } catch (error) {
+        console.error('Lỗi khi lấy sản phẩm yêu thích:', error);
+        dataRes.data = null;
+        dataRes.msg = 'Lỗi server: ' + error.message;
+    }
+    
+    res.json(dataRes);
+};

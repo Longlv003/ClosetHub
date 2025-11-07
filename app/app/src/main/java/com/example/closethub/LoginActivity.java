@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.closethub.models.ApiResponse;
+import com.example.closethub.models.LoginResponse;
 import com.example.closethub.models.User;
 import com.example.closethub.networks.ApiService;
 import com.example.closethub.networks.RetrofitClient;
@@ -92,11 +93,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void LoginAccount(User user) {
-        apiService.getLogin(user).enqueue(new Callback<ApiResponse<User>>() {
+        apiService.getLogin(user).enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    User loggedInUser = response.body().getData();
+                    LoginResponse loginResponse = response.body().getData();
+                    User loggedInUser = loginResponse.getUser();
+                    String token = loginResponse.getToken();
 
                     if (loggedInUser == null) {
                         Toast.makeText(LoginActivity.this, "Login thất bại: user null", Toast.LENGTH_SHORT).show();
@@ -109,6 +112,8 @@ public class LoginActivity extends AppCompatActivity {
                     if (chkRemember.isChecked()) {
                         editor.putString("email", user.getEmail());
                         editor.putString("password", user.getPass());
+                        editor.putString("id_user", loggedInUser.get_id());
+                        editor.putString("token", token);
                         editor.putBoolean("remember", true);
                     } else {
                         sharedPreferences.edit().clear().apply();
@@ -120,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
                     editor.apply();
 
                     Toast.makeText(LoginActivity.this, "Login successfully", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(LoginActivity.this, "id: " + loggedInUser.get_id(), Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 } else {
@@ -128,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable throwable) {
+            public void onFailure(Call<ApiResponse<LoginResponse>> call, Throwable throwable) {
                 Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
                 Log.e("Error", "Login Failed", throwable);
             }

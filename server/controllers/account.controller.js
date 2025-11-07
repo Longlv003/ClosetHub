@@ -64,15 +64,30 @@ exports.doReg = async (req, res, next) => {
 };
 
 exports.UploadAvatar = async (req, res, next) => {
-    let dataRes = {msg: 'OK'};
+    let dataRes = { msg: 'OK' };
     try {
+        const { _id } = req.params;
+
+        if (!req.file) throw new Error("Không có file tải lên");
+
+        const user = await userModel.findById(_id);
+        if (!user) throw new Error("Không tìm thấy người dùng");
+
         const fileName = await uploadSingleFile(req.file, 'avatars');
-        dataRes.data = fileName;
+        user.image = fileName;
+        await user.save();
+
+        dataRes.msg = "Cập nhật ảnh đại diện thành công";
+        dataRes.data = user;
     } catch (error) {
+        console.error("UploadAvatar Error:", error);
         dataRes.msg = error.message;
+        dataRes.data = null;
     }
     res.json(dataRes);
 };
+
+
 
 exports.updateUserStatus = async (req, res) => {
     try {
@@ -114,5 +129,55 @@ exports.GetAllAccount = async (req, res, next) => {
         dataRes.data = null;
         dataRes.msg = error.message;
     }
+    res.json(dataRes);
+};
+
+exports.UpdateUser = async (req, res, next) => {
+    let dataRes = { msg: 'OK' };
+
+    try {
+        const { _id } = req.params;
+        const { email, phone } = req.body; // đọc text fields từ multipart
+
+        const user = await userModel.findById(_id);
+        if (!user) throw new Error("Người dùng không tồn tại");
+
+        let updateData = {};
+
+        if (email && email !== user.email) {
+            const existingUser = await userModel.findOne({ email });
+            if (existingUser) throw new Error("Email đã tồn tại");
+            updateData.email = email;
+        }
+
+        if (phone) updateData.phone = phone;
+
+        // ✅ Nếu có file upload
+        if (req.file) {
+            const fileName = await uploadSingleFile(req.file, 'avatars');
+            updateData.image = fileName;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            throw new Error("Không có dữ liệu để cập nhật");
+        }
+
+        const updatedUser = await userModel.findByIdAndUpdate(
+            _id,
+            updateData,
+            { new: true }
+        ).select('-pass -token');
+
+        if (!updatedUser) throw new Error("Cập nhật thất bại");
+
+        dataRes.msg = "Cập nhật thông tin thành công";
+        dataRes.data = updatedUser;
+
+    } catch (error) {
+        console.error('UpdateUser Error:', error);
+        dataRes.data = null;
+        dataRes.msg = error.message;
+    }
+
     res.json(dataRes);
 };

@@ -16,6 +16,24 @@
         android:theme="@style/Theme.Commodity_management"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ItemProductBillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HeaderBillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ItemBillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WalletLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewAllProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ItemProductCartActivity"
+            android:exported="false" />
+        <activity
             android:name=".AccountProfileActivity"
             android:exported="false" />
         <activity

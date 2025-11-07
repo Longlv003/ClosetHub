@@ -1,26 +1,39 @@
 package com.example.closethub.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.closethub.R;
+import com.example.closethub.models.ApiResponse;
+import com.example.closethub.models.Cart;
+import com.example.closethub.models.CartRequest;
 import com.example.closethub.models.Product;
+import com.example.closethub.networks.ApiService;
+import com.example.closethub.networks.RetrofitClient;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
     private Context context;
     private ArrayList<Product> productArrayList;
+    private ApiService apiService = RetrofitClient.getApiService();
 
     public ProductAdapter(Context context, ArrayList<Product> productArrayList) {
         this.context = context;
@@ -50,15 +63,115 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         String formattedPrice = formatter.format(product.getPrice()) + " ₫";
         holder.txtPrice.setText("Price: " + formattedPrice);
-        holder.txtQty.setText("Quantity: " + String.valueOf(product.getQty()));
+        //holder.txtQty.setText("Quantity: " + String.valueOf(product.getQuantity()));
+
+        if (product.getQuantity() <= 0) {
+            holder.txtQty.setText("Hết hàng");
+            holder.txtQty.setTextColor(context.getResources().getColor(R.color.red));
+
+            // Ẩn nút Add to cart
+            holder.txtAddCart.setVisibility(View.GONE);
+        } else {
+            holder.txtQty.setText("Quantity: " + String.valueOf(product.getQuantity()));
+            holder.txtQty.setTextColor(context.getResources().getColor(R.color.black));
+
+            // Hiện nút Add to cart
+            holder.txtAddCart.setVisibility(View.VISIBLE);
+            holder.txtAddCart.setOnClickListener(v -> {
+                AddToCart(product);
+            });
+        }
+
+        if (product.isIs_favorite()) {
+            holder.imgFavorite.setImageResource(R.drawable.ic_favorite_red);
+        } else {
+            holder.imgFavorite.setImageResource(R.drawable.ic_favorite);
+        }
+
+        // Xử lý click favorite
+        holder.imgFavorite.setOnClickListener(v -> {
+            toggleFavorite(product, holder);
+        });
 
         holder.txtAddCart.setOnClickListener(v -> {
             AddToCart(product);
         });
     }
 
-    private void AddToCart(Product product) {
+    private void toggleFavorite(Product product, ProductViewHolder holder) {
+        boolean newFavoriteStatus = !product.isIs_favorite();
 
+        SharedPreferences sharedPref = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String idUser = sharedPref.getString("id_user", null);
+        String token_user = sharedPref.getString("token", null);
+
+        if(idUser == null) {
+            Toast.makeText(context, "Vui lòng đăng nhập để thêm yêu thích", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        apiService.toggleFavorite(token_user, product.get_id(), newFavoriteStatus).enqueue(new Callback<ApiResponse<Product>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Product>> call, Response<ApiResponse<Product>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Product> apiResponse = response.body();
+
+                    // Cập nhật trạng thái local
+                    product.setIs_favorite(newFavoriteStatus);
+
+                    // Cập nhật icon
+                    if (newFavoriteStatus) {
+                        holder.imgFavorite.setImageResource(R.drawable.ic_favorite_red);
+                        Toast.makeText(context, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
+                    } else {
+                        holder.imgFavorite.setImageResource(R.drawable.ic_favorite);
+                        Toast.makeText(context, "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(context, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Product>> call, Throwable throwable) {
+                Toast.makeText(context, "Lỗi kết nối: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("ToggleFavorite", "Error: ", throwable);
+            }
+        });
+    }
+
+    private void AddToCart(Product product) {
+        SharedPreferences sharedPref = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String idUser = sharedPref.getString("id_user", null);
+        String token_user = sharedPref.getString("token", null);
+
+        if(idUser == null) {
+            Toast.makeText(context, "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String idProduct = product.get_id();
+        int quantity = 1;
+        CartRequest cartRequest = new CartRequest();
+        cartRequest.setId_user(idUser);
+        cartRequest.setId_product(idProduct);
+        cartRequest.setQuantity(quantity);
+
+        apiService.addToCart(token_user, cartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(context, "Add thanh cong", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "Add that bai", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Cart>> call, Throwable throwable) {
+                Toast.makeText(context, "that bai", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

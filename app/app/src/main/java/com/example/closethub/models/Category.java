@@ -3,6 +3,15 @@ package com.example.closethub.models;
 public class Category {
     private String _id;
     private String name;
+    private int productCount;
+
+    public int getProductCount() {
+        return productCount;
+    }
+
+    public void setProductCount(int productCount) {
+        this.productCount = productCount;
+    }
 
     public String get_id() {
         return _id;

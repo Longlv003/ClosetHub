@@ -1,12 +1,32 @@
 package com.example.closethub;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.example.closethub.adapter.BillAdapter;
+import com.example.closethub.models.ApiResponse;
+import com.example.closethub.models.Bill;
+import com.example.closethub.networks.ApiService;
+import com.example.closethub.networks.RetrofitClient;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,11 +74,54 @@ public class BillFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+    private RecyclerView rcvBills;
+    private BillAdapter billAdapter;
+    private ArrayList<Bill> billArrayList;
+    private ApiService apiService = RetrofitClient.getApiService();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bill, container, false);
+        View view = inflater.inflate(R.layout.fragment_bill, container, false);
+        initUI(view);
+
+        rcvBills.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        SharedPreferences sharedPref = getContext().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String idUser = sharedPref.getString("id_user", null);
+
+        if(idUser == null) {
+            Toast.makeText(getContext(), "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+        }
+        billArrayList = new ArrayList<>();
+        billAdapter = new BillAdapter(getContext(),billArrayList);
+        rcvBills.setAdapter(billAdapter);
+
+        loadBills(idUser);
+        return view;
+    }
+
+    private void loadBills(String idUser) {
+        apiService.getBills(idUser).enqueue(new Callback<ApiResponse<List<Bill>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<Bill>>> call, Response<ApiResponse<List<Bill>>> response) {
+                if(response.isSuccessful() && response.body() != null){
+                    billArrayList.clear();
+                    billArrayList.addAll(response.body().getData());
+                    billAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(getContext(), "Lỗi load bill!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<Bill>>> call, Throwable throwable) {
+                Log.e("Error", "Error", throwable);
+            }
+        });
+    }
+
+    private void initUI(View view) {
+        rcvBills = view.findViewById(R.id.rcvBills);
     }
 }

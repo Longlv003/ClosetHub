@@ -11,6 +11,14 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:queryHint="Tìm kiếm sản phẩm..."
+            android:iconifiedByDefault="false" />
+
         <!-- Banner Section -->
         <RelativeLayout
             android:layout_width="match_parent"
@@ -46,12 +54,24 @@
                 android:id="@+id/txtCategoryList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Category"
+                android:text="Khám Phá Danh Mục"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:id="@+id/txtViewAllCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sell all"
+                android:textSize="15sp"
+                android:textColor="#62DB68"
+                android:clickable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/txtCategoryList"
+                app:layout_constraintBottom_toBottomOf="@id/txtCategoryList" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -60,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:scrollbars="horizontal" />
+            android:scrollbars="vertical" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -70,7 +90,7 @@
                 android:id="@+id/txtCategory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All Product"
+                android:text="Sản Phẩm Bán Chạy"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -94,9 +114,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rcvProduct"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:paddingHorizontal="8dp"
-            android:scrollbars="horizontal" />
+            />
 
     </LinearLayout>
 

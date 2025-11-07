@@ -6,12 +6,21 @@ public class Product {
     private String _id;
     private String name;
     private double price;
-    private int qty;
+    private int quantity;
     private String description;
     private String image;
     private String catID;
     private Date createdAt;
     private boolean is_favorite;
+    private int total_sold;
+
+    public int getTotal_sold() {
+        return total_sold;
+    }
+
+    public void setTotal_sold(int total_sold) {
+        this.total_sold = total_sold;
+    }
 
     public boolean isIs_favorite() {
         return is_favorite;
@@ -45,12 +54,12 @@ public class Product {
         this.price = price;
     }
 
-    public int getQty() {
-        return qty;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setQty(int qty) {
-        this.qty = qty;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getDescription() {

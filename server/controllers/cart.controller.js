@@ -23,29 +23,45 @@ exports.addToCart = async (req, res, next) => {
     let dataRes = {msg: 'OK'};
     try {
         const {id_user, id_product, quantity} = req.body;
+        const qtyToAdd = quantity || 1;
+        
         if (!id_user || !id_product) {
-            throw new Error("Thieu thong tin nguoi dung hoa san pham");
+            throw new Error("Thieu thong tin nguoi dung hoac san pham");
         }
 
-        // Kiem tra sp ton tai khong?
+        // Kiểm tra sp tồn tại không?
         const product = await pModel.findById(id_product);
         if (!product) {
             throw new Error("Khong tim thay san pham");
         }
 
-        // Ktr cart co sp chua?
+        // Kiểm tra số lượng tồn kho (chỉ kiểm tra, không trừ)
+        if (product.qty < qtyToAdd) {
+            throw new Error("So luong san pham trong kho khong du");
+        }
+
+        // Kiểm tra cart có sp chưa?
         let cartItem = await cartModel.findOne({id_user, id_product});
         if (cartItem) {
-            cartItem.quantity += (quantity||1);
+            // Kiểm tra tổng số lượng sau khi thêm
+            const newTotalQuantity = cartItem.quantity + qtyToAdd;
+            if (product.qty < newTotalQuantity) {
+                throw new Error("So luong san pham trong kho khong du");
+            }
+            cartItem.quantity = newTotalQuantity;
             await cartItem.save();
         } else {
             cartItem = new cartModel({
                 id_user,
                 id_product,
-                quantity: quantity || 1
+                quantity: qtyToAdd
             });
             await cartItem.save();
         }
+
+        // KHÔNG trừ số lượng ở đây - sẽ trừ khi thanh toán
+        // product.qty -= qtyToAdd;
+        // await product.save();
 
         dataRes.data = cartItem;
     } catch (error) {

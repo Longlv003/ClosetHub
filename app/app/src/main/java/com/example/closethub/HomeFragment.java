@@ -1,8 +1,10 @@
 package com.example.closethub;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -27,6 +29,10 @@ import com.example.closethub.models.Category;
 import com.example.closethub.models.Product;
 import com.example.closethub.networks.ApiService;
 import com.example.closethub.networks.RetrofitClient;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +102,7 @@ public class HomeFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     private ArrayList<Product> productArrayList;
     private ProductAdapter productAdapter;
-    private TextView txtViewAll, txtCategory;
+    private TextView txtViewAll, txtViewAllCategory, txtCategory;
     String categoryId = "";
 
     @Override
@@ -110,10 +116,12 @@ public class HomeFragment extends Fragment {
         loadBannersFromAPI();
 
         categoryArrayList = new ArrayList<>();
-        //rcvCategory.setLayoutManager(new LinearLayoutManager(this));
-        rcvCategory.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
-        );
+        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(getContext());
+        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+        flexboxLayoutManager.setFlexWrap(FlexWrap.WRAP);
+        flexboxLayoutManager.setJustifyContent(JustifyContent.FLEX_START);
+
+        rcvCategory.setLayoutManager(flexboxLayoutManager);
 
         categoryAdapter = new CategoryAdapter(getContext(), categoryArrayList);
         rcvCategory.setAdapter(categoryAdapter);
@@ -126,26 +134,37 @@ public class HomeFragment extends Fragment {
             GetListProductByCat(categoryId);
         });
 
-        GetListCategory();
+        getTopCategories();
 
         productArrayList = new ArrayList<>();
+//        rcvProduct.setLayoutManager(
+//                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
+//        );
         rcvProduct.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
+                new GridLayoutManager(getContext(), 2)
         );
         productAdapter = new ProductAdapter(getContext(), productArrayList);
         rcvProduct.setAdapter(productAdapter);
 
         if (categoryId.equals("")) {
-            GetListProduct();
+            GetTopSellingProducts();
         } else {
             GetListProductByCat(categoryId);
         }
 
+        txtViewAll.setOnClickListener(v -> {
+            startActivity(new Intent(getContext(), ViewAllProductActivity.class));
+        });
+
+        txtViewAllCategory.setOnClickListener(v -> {
+            startActivity(new Intent(getContext(), ViewAllProductActivity.class));
+        });
+
         return view;
     }
 
-    private void GetListProduct() {
-        apiService.getListProduct().enqueue(new Callback<ApiResponse<List<Product>>>() {
+    private void GetTopSellingProducts() {
+        apiService.GetTopSellingProducts().enqueue(new Callback<ApiResponse<List<Product>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Product>>> call, Response<ApiResponse<List<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -181,8 +200,8 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void GetListCategory() {
-        apiService.getListCategory().enqueue(new Callback<ApiResponse<List<Category>>>() {
+    private void getTopCategories() {
+        apiService.getTopCategories().enqueue(new Callback<ApiResponse<List<Category>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Category>>> call, Response<ApiResponse<List<Category>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -300,6 +319,7 @@ public class HomeFragment extends Fragment {
         rcvProduct = view.findViewById(R.id.rcvProduct);
         txtCategory = view.findViewById(R.id.txtCategory);
         txtViewAll = view.findViewById(R.id.txtViewAll);
+        txtViewAllCategory = view.findViewById(R.id.txtViewAllCategory);
     }
 
 }

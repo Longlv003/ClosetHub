@@ -5,10 +5,27 @@ public class User {
     private String email;
     private String pass;
     private String role;
-    private Boolean is_active;
-    //private Boolean is_delete;
+    private boolean is_active;
+    private String token;
+    private boolean has_wallet;
     private String phone;
     private String image;
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
     public String get_id() {
         return _id;
@@ -42,35 +59,27 @@ public class User {
         this.role = role;
     }
 
-    public Boolean getIs_active() {
+    public boolean isIs_active() {
         return is_active;
     }
 
-    public void setIs_active(Boolean is_active) {
+    public void setIs_active(boolean is_active) {
         this.is_active = is_active;
     }
 
-//    public Boolean getIs_delete() {
-//        return is_delete;
-//    }
-//
-//    public void setIs_delete(Boolean is_delete) {
-//        this.is_delete = is_delete;
-//    }
-
-    public String getPhone() {
-        return phone;
+    public String getToken() {
+        return token;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public String getImage() {
-        return image;
+    public boolean isHas_wallet() {
+        return has_wallet;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setHas_wallet(boolean has_wallet) {
+        this.has_wallet = has_wallet;
     }
 }

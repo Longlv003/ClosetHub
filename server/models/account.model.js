@@ -6,8 +6,8 @@ const bcrypt = require('bcrypt');
 
 const accSchema = new db.mongoose.Schema(
     {
-        email: {type: String, required: true},
-        pass: {type: String, required: true},
+        email: {type: String, required: true, unique: true},
+        pass: {type: String, required: true, unique: true},
         role: { 
             type: String, 
             enum: ['user', 'admin'], 

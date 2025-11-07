@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
                     selectBottomBar(0);
                 } else if (id == R.id.nav_profile) {
                     startActivity(new Intent(MainActivity.this, AccountProfileActivity.class));
+                } else if (id == R.id.nav_wallet) {
+                    startActivity(new Intent(MainActivity.this, WalletLoginActivity.class));
                 } else if (id == R.id.nav_settings) {
                     //selectBottomBar(0);
                 } else if (id == R.id.nav_logout) {
