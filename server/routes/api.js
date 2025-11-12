@@ -78,9 +78,19 @@ router.get("/category/list", catCtrl.getListCat);
 router.get("/categories/top4", catCtrl.GetTopCategories);
 
 // Product
-router.post("/product/add", upload.single("image"), pCtrl.addProduct);
-router.put("/product/edit/:_id", pCtrl.EditProduct);
-router.delete("/product/delete/:_id", pCtrl.DeleteProduct);
+router.post(
+  "/product/add",
+  mdw.api_auth,
+  upload.single("image"),
+  pCtrl.addProduct
+);
+router.put(
+  "/product/edit/:_id",
+  mdw.api_auth,
+  upload.single("image"),
+  pCtrl.EditProduct
+);
+router.delete("/product/delete/:_id", mdw.api_auth, pCtrl.DeleteProduct);
 router.get("/product/list", pCtrl.GetListProduct);
 router.get("/product/list-by-cat", pCtrl.GetProductByCat);
 router.get("/product/list/top-selling", pCtrl.GetTopSellingProducts);

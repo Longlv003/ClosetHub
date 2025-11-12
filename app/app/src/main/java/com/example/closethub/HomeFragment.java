@@ -265,7 +265,7 @@ public class HomeFragment extends Fragment {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            params.setMargins(8, 0, 8, 0);
+            params.setMargins(0, 0, 0, 0);
 
             imageView.setLayoutParams(params);
             layoutIndicator.addView(imageView);
