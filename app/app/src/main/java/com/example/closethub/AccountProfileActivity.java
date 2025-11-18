@@ -218,6 +218,9 @@ public class AccountProfileActivity extends AppCompatActivity {
                                 SharedPreferences.Editor editor = getSharedPreferences("LoginPrefs", MODE_PRIVATE).edit();
                                 editor.putString("user_data", new Gson().toJson(updatedUser));
                                 editor.apply();
+                                
+                                // Set result để PayActivity có thể reload data
+                                setResult(RESULT_OK);
                             } else {
                                 Toast.makeText(AccountProfileActivity.this, "Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
                                 Log.e("Update", "Response: " + response.message());

@@ -114,15 +114,28 @@ public class CartFragment extends Fragment {
         cartAdapter = new CartAdapter(getContext(), productArrayList);
         cartAdapter.setOnQuantityChangeListener(() -> {
             updateQuantitySummary();
+            updatePayButton();
         });
         rcvProductList.setAdapter(cartAdapter);
 
+        // Khởi tạo summary ban đầu
+        updateQuantitySummary();
+        updatePayButton();
+
         if(user.get_id() == null) {
             Toast.makeText(getContext(), "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+            btnPay.setEnabled(false);
+            btnPay.setAlpha(0.5f);
+        } else {
+            GetListProduct(user.get_id());
         }
-        GetListProduct(user.get_id());
 
         btnPay.setOnClickListener(v -> {
+            // Kiểm tra lại trước khi chuyển màn hình
+            if (productArrayList == null || productArrayList.isEmpty()) {
+                Toast.makeText(getContext(), "Giỏ hàng trống, vui lòng thêm sản phẩm", Toast.LENGTH_SHORT).show();
+                return;
+            }
             startActivity(new Intent(getContext(), PayActivity.class));
         });
 
@@ -136,21 +149,31 @@ public class CartFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     productArrayList.clear();
                     List<CartLookUpProduct> data = response.body().getData();
-                    if (data == null || data.isEmpty()) {
-                        Log.e("CART", "No data returned from API");
-                        return;
+                    
+                    if (data != null && !data.isEmpty()) {
+                        productArrayList.addAll(data);
+                    } else {
+                        Log.d("CART", "Cart is empty");
                     }
 
-                    productArrayList.addAll(data);
                     cartAdapter.notifyDataSetChanged();
                     updateQuantitySummary();
+                    updatePayButton();
                 } else {
-                    Toast.makeText(getContext(), "...", Toast.LENGTH_SHORT).show();
+                    productArrayList.clear();
+                    cartAdapter.notifyDataSetChanged();
+                    updateQuantitySummary();
+                    updatePayButton();
+                    // Toast.makeText(getContext(), "Không thể tải giỏ hàng", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<List<CartLookUpProduct>>> call, Throwable throwable) {
+                productArrayList.clear();
+                cartAdapter.notifyDataSetChanged();
+                updateQuantitySummary();
+                updatePayButton();
                 Toast.makeText(getContext(), "Error: " +throwable.getMessage() , Toast.LENGTH_SHORT).show();
                 Log.e("Error", "ProductMyCart Failed", throwable);
             }
@@ -161,17 +184,35 @@ public class CartFragment extends Fragment {
         int totalQuantity = 0;
         double totalAmount = 0;
 
-        for (CartLookUpProduct item : productArrayList) {
-            totalQuantity += item.getQuantity();
-            totalAmount += item.getQuantity() * item.getId_variant().getPrice();
+        if (productArrayList != null && !productArrayList.isEmpty()) {
+            for (CartLookUpProduct item : productArrayList) {
+                if (item != null && item.getId_variant() != null) {
+                    totalQuantity += item.getQuantity();
+                    totalAmount += item.getQuantity() * item.getId_variant().getPrice();
+                }
+            }
         }
 
+        // Đảm bảo hiển thị 0 khi không có sản phẩm
         txtQuantity.setText(String.valueOf(totalQuantity));
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-        txtAmount.setText(formatter.format(totalAmount) + " ₫");
+        String formattedAmount = formatter.format(totalAmount) + " ₫";
+        txtAmount.setText(formattedAmount);
+        txtTotalAmount.setText(formattedAmount);
+    }
 
-        txtTotalAmount.setText(formatter.format(totalAmount) + " ₫");
+    private void updatePayButton() {
+        // Disable button thanh toán nếu giỏ hàng trống
+        boolean hasItems = productArrayList != null && !productArrayList.isEmpty();
+        btnPay.setEnabled(hasItems);
+        btnPay.setAlpha(hasItems ? 1.0f : 0.5f); // Làm mờ button khi disable
+        
+        if (!hasItems) {
+            btnPay.setText("Giỏ hàng trống");
+        } else {
+            btnPay.setText("Thanh toán");
+        }
     }
 
     private void initViews(View view) {

@@ -14,6 +14,10 @@ public class Product {
     private int quantity;
     private double min_price;
     private double max_price;
+    private double price; // Giá từ bill_detail
+    private double amount; // Tổng tiền = price * quantity
+    private String size; // Size từ bill_detail
+    private String color; // Color từ bill_detail
 
     public String get_id() {
         return _id;
@@ -93,5 +97,37 @@ public class Product {
 
     public void setVariants(List<Variant> variants) {
         this.variants = variants;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }

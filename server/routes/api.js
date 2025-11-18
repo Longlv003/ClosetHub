@@ -114,5 +114,12 @@ router.get("/order/history/:id_user", orderCtrl.GetOrderHistory);
 
 // Wallet
 router.post("/wallet/create", mdw.api_auth, walletCtrl.CreateWallet);
+router.post("/wallet/login", mdw.api_auth, walletCtrl.LoginWallet);
+router.get("/wallet/info", mdw.api_auth, walletCtrl.GetWalletInfo);
+router.get("/wallet/balance", mdw.api_auth, walletCtrl.CheckBalance);
+router.post("/wallet/deposit", mdw.api_auth, walletCtrl.Deposit);
+router.post("/wallet/withdraw", mdw.api_auth, walletCtrl.Withdraw);
+router.put("/wallet/change-pin", mdw.api_auth, walletCtrl.ChangePin);
+router.get("/wallet/history", mdw.api_auth, walletCtrl.GetTransactionHistory);
 
 module.exports = router;

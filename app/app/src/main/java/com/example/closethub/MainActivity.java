@@ -1,6 +1,7 @@
 package com.example.closethub;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -16,7 +17,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
+import com.example.closethub.models.User;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView imgHome, imgBill, imgCart, imgHeart, imgMenu;
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_profile) {
                     startActivity(new Intent(MainActivity.this, AccountProfileActivity.class));
                 } else if (id == R.id.nav_wallet) {
+                    // Luôn chuyển đến WalletLoginActivity để kiểm tra PIN
                     startActivity(new Intent(MainActivity.this, WalletLoginActivity.class));
                 } else if (id == R.id.nav_settings) {
                     //selectBottomBar(0);

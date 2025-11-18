@@ -1,5 +1,6 @@
 package com.example.closethub;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -252,11 +253,14 @@ public class HomeFragment extends Fragment {
 
     private void setupIndicator() {
         if (layoutIndicator == null) return;
+        
+        Context context = getContext();
+        if (context == null) return;
 
         layoutIndicator.removeAllViews();
 
         for (int i = 0; i < bannerArrayList.size(); i++) {
-            ImageView imageView = new ImageView(getContext());
+            ImageView imageView = new ImageView(context);
             imageView.setImageResource(
                     i == 0 ? R.drawable.dot_active : R.drawable.dot_inactive
             );

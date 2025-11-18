@@ -35,12 +35,38 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.BillViewHolder
     @Override
     public void onBindViewHolder(@NonNull BillViewHolder holder, int position) {
         Bill b = billArrayList.get(position);
-        holder.txtIdBill.setText("Bill ID: " + b.getBill_id());
-        holder.txtDate.setText("Date: " + b.getCreated_date().split("T")[0]);
-        holder.txtAddress.setText("Address: " + b.getAddress());
+        holder.txtIdBill.setText("Mã đơn: " + b.getBill_id());
+        
+        // Parse date
+        String dateStr = b.getCreated_date();
+        if (dateStr != null && dateStr.contains("T")) {
+            dateStr = dateStr.split("T")[0];
+        }
+        holder.txtDate.setText("Ngày: " + dateStr);
+        
+        // Parse address để hiển thị đẹp hơn
+        String displayAddress = b.getAddress();
+        if (displayAddress != null && displayAddress.contains("|")) {
+            String[] parts = displayAddress.split("\\|");
+            displayAddress = parts[0].trim(); // Chỉ lấy phần địa chỉ thực
+        }
+        holder.txtAddress.setText("Địa chỉ: " + displayAddress);
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-        holder.txtTotal.setText("Total: " + formatter.format(b.getTotal_amount()));
+        
+        // Hiển thị tổng tiền với thông tin chi tiết
+        String totalText = "Tổng: " + formatter.format(b.getTotal_amount()) + " ₫";
+        
+        // Nếu có subtotal và shipping_fee, hiển thị chi tiết
+        if (b.getSubtotal() > 0 || b.getShipping_fee() > 0) {
+            totalText += "\n(Tạm tính: " + formatter.format(b.getSubtotal()) + " ₫";
+            if (b.getShipping_fee() > 0) {
+                totalText += " + Phí vận chuyển: " + formatter.format(b.getShipping_fee()) + " ₫";
+            }
+            totalText += ")";
+        }
+        
+        holder.txtTotal.setText(totalText);
 
         // set RecyclerView con
         ProductBillAdapter billAdapter = new ProductBillAdapter(context, new ArrayList<>(b.getProducts()));

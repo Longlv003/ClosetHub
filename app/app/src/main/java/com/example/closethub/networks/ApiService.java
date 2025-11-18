@@ -8,8 +8,14 @@ import com.example.closethub.models.CartLookUpProduct;
 import com.example.closethub.models.CartRequest;
 import com.example.closethub.models.Category;
 import com.example.closethub.models.LoginResponse;
+import com.example.closethub.models.OrderRequest;
 import com.example.closethub.models.Product;
 import com.example.closethub.models.User;
+import com.example.closethub.models.Transaction;
+import com.example.closethub.models.WalletLoginRequest;
+import com.example.closethub.models.WalletRequest;
+import com.example.closethub.models.WalletResponse;
+import com.example.closethub.models.WalletTransactionRequest;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +27,7 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -101,11 +108,11 @@ public interface ApiService {
             @Path("id") String id
     );
 
-//    @POST("/api/order")
-//    Call<ApiResponse<Objects>> PayCart(
-//            @Header("Authorization") String token,
-//            @Body OrderRequest orderRequest
-//    );
+    @POST("/api/order")
+    Call<ApiResponse<Bill>> placeOrder(
+            @Header("Authorization") String token,
+            @Body OrderRequest orderRequest
+    );
 
     @GET("/api/order/history/{id_user}")
     Call<ApiResponse<List<Bill>>> getBills(@Path("id_user") String userId);
@@ -120,5 +127,41 @@ public interface ApiService {
 
     @GET("/api/product/{id}")
     Call<ApiResponse<Product>> getProductDetail(@Path("id") String id);
+
+    // Wallet APIs
+    @POST("/api/wallet/create")
+    Call<ApiResponse<WalletResponse>> createWallet(
+            @Header("Authorization") String token,
+            @Body WalletRequest walletRequest
+    );
+
+    @POST("/api/wallet/login")
+    @Headers("Content-Type: application/json")
+    Call<ApiResponse<Object>> loginWallet(
+            @Header("Authorization") String token,
+            @Body WalletLoginRequest walletLoginRequest
+    );
+
+    @GET("/api/wallet/info")
+    Call<ApiResponse<WalletResponse>> getWalletInfo(
+            @Header("Authorization") String token
+    );
+
+    @POST("/api/wallet/deposit")
+    Call<ApiResponse<WalletResponse>> depositWallet(
+            @Header("Authorization") String token,
+            @Body WalletTransactionRequest request
+    );
+
+    @POST("/api/wallet/withdraw")
+    Call<ApiResponse<WalletResponse>> withdrawWallet(
+            @Header("Authorization") String token,
+            @Body WalletTransactionRequest request
+    );
+
+    @GET("/api/wallet/history")
+    Call<ApiResponse<List<Transaction>>> getWalletHistory(
+            @Header("Authorization") String token
+    );
 
 }
