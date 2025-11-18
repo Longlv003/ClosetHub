@@ -4,7 +4,16 @@ public class CartLookUpProduct {
     private String _id;
     private String id_user;
     private Product id_product;
+    private Variant id_variant;
     private int quantity;
+
+    public Variant getId_variant() {
+        return id_variant;
+    }
+
+    public void setId_variant(Variant id_variant) {
+        this.id_variant = id_variant;
+    }
 
     public String get_id() {
         return _id;

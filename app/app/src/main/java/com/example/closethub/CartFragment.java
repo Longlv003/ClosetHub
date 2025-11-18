@@ -23,6 +23,7 @@ import com.example.closethub.adapter.CartAdapter;
 import com.example.closethub.models.ApiResponse;
 import com.example.closethub.models.CartLookUpProduct;
 import com.example.closethub.models.OrderRequest;
+import com.example.closethub.models.Product;
 import com.example.closethub.networks.ApiService;
 import com.example.closethub.networks.RetrofitClient;
 
@@ -181,35 +182,21 @@ public class CartFragment extends Fragment {
         });
     }
 
-//    private void PayCart(String token, String id,String address) {
-//        apiService.PayCart(token, id, address).enqueue(new Callback<ApiResponse<Objects>>() {
-//            @Override
-//            public void onResponse(Call<ApiResponse<Objects>> call, Response<ApiResponse<Objects>> response) {
-//                if (response.isSuccessful() && response.body() != null) {
-//                    Toast.makeText(getContext(), "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
-//                    productArrayList.clear();
-//                    cartAdapter.notifyDataSetChanged();
-//                    updateQuantitySummary();
-//                } else {
-//                    Toast.makeText(getContext(), "Thanh toán thất bại!", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ApiResponse<Objects>> call, Throwable throwable) {
-//                Toast.makeText(getContext(), "Lỗi mạng: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-//                Log.e("Error", "Pay", throwable);
-//            }
-//        });
-//    }
-
-
     private void GetListProduct(String id) {
         apiService.getListProductMyCart(id).enqueue(new Callback<ApiResponse<List<CartLookUpProduct>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<CartLookUpProduct>>> call, Response<ApiResponse<List<CartLookUpProduct>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     productArrayList.clear();
+
+                    List<CartLookUpProduct> data = response.body().getData();
+
+                    if (data == null || data.isEmpty()) {
+                        // Không có dữ liệu để cập nhật
+                        Log.e("CART", "No data returned from API");
+                        return;  // Dừng hàm để không bị NullPointerException
+                    }
+
                     productArrayList.addAll(response.body().getData());
                     cartAdapter.notifyDataSetChanged();
                     updateQuantitySummary();

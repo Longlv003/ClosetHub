@@ -1,13 +1,18 @@
 package com.example.closethub;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,10 +24,15 @@ import com.bumptech.glide.Glide;
 import com.example.closethub.adapter.ColorProductAdapter;
 import com.example.closethub.adapter.SizeProductAdapter;
 import com.example.closethub.models.ApiResponse;
+import com.example.closethub.models.Cart;
+import com.example.closethub.models.CartLookUpProduct;
+import com.example.closethub.models.CartRequest;
 import com.example.closethub.models.Product;
+import com.example.closethub.models.User;
 import com.example.closethub.models.Variant;
 import com.example.closethub.networks.ApiService;
 import com.example.closethub.networks.RetrofitClient;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +89,74 @@ public class ProductDetailActivity extends AppCompatActivity {
         });
 
         LoadDataDetail(productId);
+
+        imgAddQuantity.setOnClickListener(v -> {
+            Variant selected = getSelectedVariant();
+            if (selected == null) return;
+
+            int stock = selected.getQuantity();
+            int current = Integer.parseInt(edtQuantity.getText().toString());
+
+            if (current < stock) {
+                edtQuantity.setText(String.valueOf(current + 1));
+            }
+
+            updateQuantityButtons();
+        });
+
+
+        imgRemoveQuantity.setOnClickListener(v -> {
+            int current = Integer.parseInt(edtQuantity.getText().toString());
+
+            if (current > 1) {
+                edtQuantity.setText(String.valueOf(current - 1));
+            }
+
+            updateQuantityButtons();
+        });
+
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String userJson = prefs.getString("user_data", null);
+
+        if (userJson == null) {
+            Toast.makeText(this, "account found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Gson gson = new Gson();
+        User user = gson.fromJson(userJson, User.class);
+
+        btnAddToCart.setOnClickListener(v -> {
+            Variant variant = getSelectedVariant();
+            if (variant == null) return;
+
+            CartRequest request = new CartRequest();
+            request.setId_user(user.get_id());
+            request.setId_product(productId);
+            request.setId_variant(variant.get_id());
+            request.setQuantity(Integer.parseInt(edtQuantity.getText().toString().trim()));
+
+            AddToCart(user.getToken(), request);
+        });
+    }
+
+    private void AddToCart(String token, CartRequest request) {
+        apiService.addToCart(token, request).enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(ProductDetailActivity.this, "Thêm sản phẩm thành công", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ProductDetailActivity.this, "Thêm sản phẩm thất bại", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Cart>> call, Throwable throwable) {
+                Toast.makeText(ProductDetailActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                Log.e("Error", "AddToCart", throwable);
+            }
+        });
     }
 
     private void LoadDataDetail(String productId) {
@@ -123,19 +201,28 @@ public class ProductDetailActivity extends AppCompatActivity {
                     Log.d("LIST_SIZE", "Count: "+listSize.size());
                     Log.d("LIST_COLOR", "Count: "+listColor.size());
 
-                    sizeProductAdapter = new SizeProductAdapter(listSize, size -> {
-                        selectedSize = size;
-                        updatePrice();
-                    });
-                    rcvSize.setLayoutManager(new LinearLayoutManager(ProductDetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
-                    rcvSize.setAdapter(sizeProductAdapter);
+                    setColorAdapter(listColor);
+                    setSizeAdapter(listSize);
 
-                    colorProductAdapter = new ColorProductAdapter(listColor, color -> {
-                        selectedColor = color;
+                    if (!product.getVariants().isEmpty()) {
+                        Variant first = product.getVariants().get(0);
+
+                        selectedSize = first.getSize();
+                        selectedColor = first.getColor();
+
+                        List<String> validColors = getColorsBySize(selectedSize);
+                        colorProductAdapter.updateAvailableColors(validColors);
+                        colorProductAdapter.setSelectedColor(selectedColor);
+
+                        List<String> validSizes = getSizesByColor(selectedColor);
+                        sizeProductAdapter.updateAvailableSizes(validSizes);
+                        sizeProductAdapter.setSelectedSize(selectedSize);
+
                         updatePrice();
-                    });
-                    rcvColor.setLayoutManager(new LinearLayoutManager(ProductDetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
-                    rcvColor.setAdapter(colorProductAdapter);
+                    }
+
+                    edtQuantity.setText("1");
+                    updateQuantityButtons();
                 }
             }
 
@@ -144,6 +231,60 @@ public class ProductDetailActivity extends AppCompatActivity {
                 Log.e("API_ERROR", "Load detail failed", throwable);
             }
         });
+    }
+
+    private void setSizeAdapter(ArrayList<String> listSize) {
+        sizeProductAdapter = new SizeProductAdapter(listSize, size -> {
+            selectedSize = size;
+
+            List<String> validColors = getColorsBySize(size);
+            Log.d("GET_SIZE_COLOR", "Color = " + size + " → " + validColors);
+            colorProductAdapter.updateAvailableColors(validColors);
+
+            if (selectedColor == null || !validColors.contains(selectedColor)) {
+                selectedColor = validColors.get(0);
+            }
+
+            colorProductAdapter.setSelectedColor(selectedColor);
+
+            List<String> validSizes = getSizesByColor(selectedColor);
+            sizeProductAdapter.updateAvailableSizes(validSizes);
+            sizeProductAdapter.setSelectedSize(selectedSize);
+
+            edtQuantity.setText("1");
+            updateQuantityButtons();
+
+            updatePrice();
+        });
+        rcvSize.setLayoutManager(new LinearLayoutManager(ProductDetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
+        rcvSize.setAdapter(sizeProductAdapter);
+    }
+
+    private void setColorAdapter(ArrayList<String> listColor) {
+        colorProductAdapter = new ColorProductAdapter(listColor, color -> {
+            selectedColor = color;
+
+            List<String> validSizes = getSizesByColor(color);
+            Log.d("GET_SIZE_COLOR", "Color = " + color + " → " + validSizes);
+            sizeProductAdapter.updateAvailableSizes(validSizes);
+
+            if (selectedSize == null || !validSizes.contains(selectedSize)) {
+                selectedSize = validSizes.get(0);
+            }
+
+            sizeProductAdapter.setSelectedSize(selectedSize);
+
+            List<String> validColors = getColorsBySize(selectedSize);
+            colorProductAdapter.updateAvailableColors(validColors);
+            colorProductAdapter.setSelectedColor(selectedColor);
+
+            updatePrice();
+        });
+        rcvColor.setLayoutManager(new LinearLayoutManager(ProductDetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
+        rcvColor.setAdapter(colorProductAdapter);
+
+        edtQuantity.setText("1");
+        updateQuantityButtons();
     }
 
     private void updatePrice() {
@@ -157,6 +298,54 @@ public class ProductDetailActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    private List<String> getColorsBySize(String size) {
+        List<String> list = new ArrayList<>();
+        for (Variant v : product.getVariants()) {
+            if (v.getSize().equals(size)) {
+                list.add(v.getColor());
+            }
+        }
+        return list;
+    }
+
+    private List<String> getSizesByColor(String color) {
+        List<String> list = new ArrayList<>();
+        for (Variant v : product.getVariants()) {
+            if (v.getColor().equals(color)) {
+                list.add(v.getSize());
+            }
+        }
+        return list;
+    }
+
+    private Variant getSelectedVariant() {
+        if (product == null || product.getVariants() == null) return null;
+
+        for (Variant v : product.getVariants()) {
+            if (v.getSize().equals(selectedSize) &&
+                    v.getColor().equals(selectedColor)) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    private void updateQuantityButtons() {
+        Variant selected = getSelectedVariant();
+        if (selected == null) return;
+
+        int stock = selected.getQuantity();
+        int current = Integer.parseInt(edtQuantity.getText().toString());
+
+        // Disable nút trừ nếu số lượng = 1
+        imgRemoveQuantity.setEnabled(current > 1);
+        imgRemoveQuantity.setAlpha(current > 1 ? 1f : 0.3f);
+
+        // Disable nút cộng nếu số lượng = stock
+        imgAddQuantity.setEnabled(current < stock);
+        imgAddQuantity.setAlpha(current < stock ? 1f : 0.3f);
     }
 
 }

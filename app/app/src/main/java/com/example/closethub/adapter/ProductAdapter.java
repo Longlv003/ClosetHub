@@ -95,7 +95,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             // Hiện nút Add to cart
             holder.txtAddCart.setVisibility(View.VISIBLE);
             holder.txtAddCart.setOnClickListener(v -> {
-                AddToCart(product);
+                Intent intent = new Intent(context, ProductDetailActivity.class);
+                intent.putExtra("product_id", product.get_id());   // Gửi ID sang
+                context.startActivity(intent);
+                //AddToCart(product);
             });
         }
 
@@ -111,7 +114,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         });
 
         holder.txtAddCart.setOnClickListener(v -> {
-            AddToCart(product);
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("product_id", product.get_id());   // Gửi ID sang
+            context.startActivity(intent);
+            //AddToCart(product);
         });
 
         holder.itemView.setOnClickListener(v -> {
@@ -159,40 +165,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             public void onFailure(Call<ApiResponse<Product>> call, Throwable throwable) {
                 Toast.makeText(context, "Lỗi kết nối: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("ToggleFavorite", "Error: ", throwable);
-            }
-        });
-    }
-
-    private void AddToCart(Product product) {
-        SharedPreferences sharedPref = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
-        String idUser = sharedPref.getString("id_user", null);
-        String token_user = sharedPref.getString("token", null);
-
-        if(idUser == null) {
-            Toast.makeText(context, "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String idProduct = product.get_id();
-        int quantity = 1;
-        CartRequest cartRequest = new CartRequest();
-        cartRequest.setId_user(idUser);
-        cartRequest.setId_product(idProduct);
-        cartRequest.setQuantity(quantity);
-
-        apiService.addToCart(token_user, cartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(context, "Add thanh cong", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(context, "Add that bai", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<Cart>> call, Throwable throwable) {
-                Toast.makeText(context, "that bai", Toast.LENGTH_SHORT).show();
             }
         });
     }

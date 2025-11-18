@@ -77,6 +77,34 @@
                 android:layout_marginTop="4dp"
                 android:layout_gravity="center"/>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <View
+                    android:id="@+id/viewColor"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/circle_color"
+                    android:layout_marginEnd="20dp"/>
+
+                <TextView
+                    android:id="@+id/txtSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:textSize="16sp"
+                    android:text="S"
+                    android:textColor="#111111"
+                    android:background="@drawable/bg_unselected"
+                    android:layout_margin="5dp"/>
+
+            </LinearLayout>
+
             <!-- Add to cart -->
             <LinearLayout
                 android:layout_width="match_parent"

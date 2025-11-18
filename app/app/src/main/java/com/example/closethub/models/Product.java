@@ -14,8 +14,6 @@ public class Product {
     private int quantity;
     private double min_price;
     private double max_price;
-    private Date created_at;
-    private Date updated_at;
 
     public String get_id() {
         return _id;
@@ -87,22 +85,6 @@ public class Product {
 
     public void setMax_price(double max_price) {
         this.max_price = max_price;
-    }
-
-    public Date getCreated_at() {
-        return created_at;
-    }
-
-    public void setCreated_at(Date created_at) {
-        this.created_at = created_at;
-    }
-
-    public Date getUpdated_at() {
-        return updated_at;
-    }
-
-    public void setUpdated_at(Date updated_at) {
-        this.updated_at = updated_at;
     }
 
     public List<Variant> getVariants() {

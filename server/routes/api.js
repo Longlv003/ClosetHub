@@ -14,7 +14,7 @@ var walletCtrl = require("../controllers/wallet.controller");
 
 // User
 router.post("/account/register", upload.single("image"), accountCtrl.doReg);
-router.post("/account/login", accountCtrl.doLogin);
+router.post("/account/login", upload.none(), accountCtrl.doLogin);
 router.post(
   "/account/upload-avatar",
   upload.single("image"),
@@ -104,13 +104,6 @@ router.get("/product/:_id", pCtrl.GetProductDetail);
 
 // Cart
 router.post("/cart/add", mdw.api_auth, cartCtrl.addToCart);
-router.put(
-  "/cart/:_id/update/:newQuantity",
-  mdw.api_auth,
-  cartCtrl.UpdateCartQuantity
-);
-router.delete("/cart/delete/:_id", mdw.api_auth, cartCtrl.DeleteCartItem);
-router.get("/getListMyCart/:id_user", cartCtrl.GetListMyCart);
 
 //router.post('/order/:id_user/place/:address', mdw.api_auth, orderCtrl.PlaceOrder);
 router.post("/order", mdw.api_auth, orderCtrl.PlaceOrder);

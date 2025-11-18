@@ -58,12 +58,23 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         String token_user = sharedPref.getString("token", null);
 
         CartLookUpProduct product = productArrayList.get(position);
-        String imageUrl = "http://10.0.2.2:3000/images/products/" + product.getId_product().getImage();
+//        String imageUrl = "http://10.0.2.2:3000/images/products/" + product.getId_product().getImage();
+
+//        Glide.with(context)
+//                .load(imageUrl)
+//                .placeholder(R.drawable.ic_placeholder)
+//                .error(R.drawable.ic_error)
+//                .into(holder.imgProduct);
+
+        String imageUrl = "";
+        if (product.getId_product().getImage() != null && !product.getId_product().getImage().isEmpty()) {
+            imageUrl = "http://10.0.2.2:3000/images/products/" + product.getId_product().getImage().get(0);
+        }
 
         Glide.with(context)
                 .load(imageUrl)
-                .placeholder(R.drawable.ic_placeholder)
-                .error(R.drawable.ic_error)
+                .placeholder(R.drawable.ic_placeholder) // Ảnh tạm khi đang load
+                .error(R.drawable.ic_error)             // Ảnh lỗi nếu load thất bại
                 .into(holder.imgProduct);
 
         holder.txtName.setText(product.getId_product().getName());

@@ -66,11 +66,18 @@ public interface ApiService {
             @Header("Authorization") String token
     );
 
+//    @POST("/api/cart/add")
+//    Call<ApiResponse<Cart>> addToCart(
+//            @Header("Authorization") String token,
+//            @Body CartRequest cartRequest
+//    );
+
     @POST("/api/cart/add")
     Call<ApiResponse<Cart>> addToCart(
             @Header("Authorization") String token,
             @Body CartRequest cartRequest
     );
+
 
     @PUT("/api/cart/{id}/update/{newQuantity}")
     Call<ApiResponse<List<CartLookUpProduct>>> UpdateQuantity(
