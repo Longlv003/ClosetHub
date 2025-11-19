@@ -2,8 +2,7 @@ const { userModel } = require("../models/account.model");
 const bcrypt = require("bcrypt");
 const { uploadSingleFile } = require("../helpers/upload.helper");
 
-exports.doLogin = async (req, res, next) => {
-  // method luôn là post
+const baseLoginHandler = async (req, res, { requiredRoles = [] } = {}) => {
   try {
     const { email, pass } = req.body;
 
@@ -22,6 +21,15 @@ exports.doLogin = async (req, res, next) => {
         .json({ error: "Account is locked. Please contact admin" });
     }
 
+    if (
+      requiredRoles.length > 0 &&
+      (!user.role || !requiredRoles.includes(user.role))
+    ) {
+      return res
+        .status(403)
+        .json({ error: "Không có quyền truy cập trang quản trị" });
+    }
+
     const token = await userModel.makeAuthToken(user);
     return res.status(200).json({
       message: "Login successful",
@@ -32,6 +40,11 @@ exports.doLogin = async (req, res, next) => {
     return res.status(400).send(error);
   }
 };
+
+exports.doLogin = (req, res, next) => baseLoginHandler(req, res);
+
+exports.doAdminLogin = (req, res, next) =>
+  baseLoginHandler(req, res, { requiredRoles: ["admin"] });
 
 exports.doReg = async (req, res, next) => {
   try {

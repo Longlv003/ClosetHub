@@ -12,8 +12,11 @@ router.get("/login", (req, res) => {
 });
 
 // Trang quản lý sản phẩm sau khi đăng nhập
-router.get("/admin", (req, res) => {
+const renderAdminProducts = (req, res) => {
   res.render("admin_products");
-});
+};
+
+router.get("/admin", renderAdminProducts);
+router.get("/admin/products", renderAdminProducts);
 
 module.exports = router;
