@@ -43,6 +43,24 @@ router.put(
   upload.single("image"),
   accountCtrl.UploadAvatar
 );
+router.get(
+  "/customers/admin/overview",
+  mdw.api_auth,
+  mdw.checkRole(["admin"]),
+  accountCtrl.GetAdminCustomerOverview
+);
+router.get(
+  "/customers/admin/:id/detail",
+  mdw.api_auth,
+  mdw.checkRole(["admin"]),
+  accountCtrl.GetCustomerDetail
+);
+router.delete(
+  "/customers/admin/:id",
+  mdw.api_auth,
+  mdw.checkRole(["admin"]),
+  accountCtrl.DeleteUser
+);
 
 // Banner
 router.post(
@@ -109,6 +127,25 @@ router.get("/getListMyCart/:id_user", cartCtrl.GetListMyCart);
 //router.post('/order/:id_user/place/:address', mdw.api_auth, orderCtrl.PlaceOrder);
 router.post("/order", mdw.api_auth, orderCtrl.PlaceOrder);
 router.get("/order/history/:id_user", orderCtrl.GetOrderHistory);
+router.get(
+  "/order/admin",
+  mdw.api_auth,
+  mdw.checkRole(["admin"]),
+  orderCtrl.GetAdminOrders
+);
+router.put(
+  "/order/:orderId/status",
+  mdw.api_auth,
+  mdw.checkRole(["admin"]),
+  upload.none(),
+  orderCtrl.UpdateOrderStatus
+);
+router.get(
+  "/report/revenue",
+  mdw.api_auth,
+  mdw.checkRole(["admin"]),
+  orderCtrl.GetRevenueReport
+);
 
 // Wallet
 router.post("/wallet/create", mdw.api_auth, walletCtrl.CreateWallet);

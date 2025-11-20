@@ -11,12 +11,31 @@ router.get("/login", (req, res) => {
   res.render("login");
 });
 
-// Trang quản lý sản phẩm sau khi đăng nhập
+// Admin views
+const renderAdminDashboard = (req, res) => {
+  res.render("admin_dashboard");
+};
+
 const renderAdminProducts = (req, res) => {
   res.render("admin_products");
 };
 
-router.get("/admin", renderAdminProducts);
+const renderAdminOrders = (req, res) => {
+  res.render("admin_orders");
+};
+
+const renderAdminReports = (req, res) => {
+  res.render("admin_reports");
+};
+
+const renderAdminCustomers = (req, res) => {
+  res.render("admin_customers");
+};
+
+router.get("/admin", renderAdminDashboard);
 router.get("/admin/products", renderAdminProducts);
+router.get("/admin/orders", renderAdminOrders);
+router.get("/admin/customers", renderAdminCustomers);
+router.get("/admin/reports", renderAdminReports);
 
 module.exports = router;
