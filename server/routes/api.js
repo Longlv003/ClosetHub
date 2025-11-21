@@ -87,6 +87,7 @@ router.put(
 );
 router.delete("/product/delete/:_id", mdw.api_auth, pCtrl.DeleteProduct);
 router.get("/product/list", pCtrl.GetListProduct);
+router.get("/product/list/admin", mdw.api_auth, mdw.checkRole(["admin"]), pCtrl.GetAdminProducts);
 router.get("/product/list-by-cat", pCtrl.GetProductByCat);
 router.get("/product/list/top-selling", pCtrl.GetTopSellingProducts);
 router.put(

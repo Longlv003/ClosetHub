@@ -772,3 +772,50 @@ exports.GetProductDetail = async (req, res, next) => {
 
   res.json(dataRes);
 };
+
+// API cho admin: Lấy tất cả variants với thông tin product
+exports.GetAdminProducts = async (req, res, next) => {
+  let dataRes = { msg: "OK" };
+
+  try {
+    // Lấy tất cả variants (không bị xóa) và populate product
+    const variants = await pVariantModel
+      .find({ is_deleted: { $ne: true } })
+      .populate({
+        path: "product_id",
+        match: { is_deleted: { $ne: true } },
+      })
+      .sort({ _id: -1 });
+
+    // Filter bỏ các variant có product đã bị xóa
+    const validVariants = variants.filter((v) => v.product_id);
+
+    // Format response
+    const result = validVariants.map((v) => {
+      const product = v.product_id;
+      return {
+        variant_id: v._id,
+        product_id: product._id,
+        product_name: product.name,
+        product_code: product.productCode,
+        catID: product.catID,
+        sku: v.sku,
+        size: v.size,
+        color: v.color,
+        price: v.price,
+        quantity: v.quantity,
+        image: v.image && Array.isArray(v.image) && v.image.length > 0 ? v.image[0] : null,
+        is_in_stock: v.quantity > 0,
+      };
+    });
+
+    dataRes.data = result;
+    dataRes.msg = "Admin products retrieved successfully";
+  } catch (error) {
+    console.error("GetAdminProducts Error:", error);
+    dataRes.data = null;
+    dataRes.msg = "Server error: " + error.message;
+  }
+
+  res.json(dataRes);
+};
