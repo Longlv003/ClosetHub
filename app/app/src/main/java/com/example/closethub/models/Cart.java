@@ -10,7 +10,10 @@ public class Cart {
     private String idUser;
 
     @SerializedName("id_product")
-    private String product;
+    private String idProduct;
+
+    @SerializedName("id_variant")
+    private String idVariant;
 
     @SerializedName("quantity")
     private int quantity;
@@ -34,12 +37,20 @@ public class Cart {
         this.idUser = idUser;
     }
 
-    public String getProduct() {
-        return product;
+    public String getIdProduct() {
+        return idProduct;
     }
 
-    public void setProduct(String product) {
-        this.product = product;
+    public void setIdProduct(String idProduct) {
+        this.idProduct = idProduct;
+    }
+
+    public String getIdVariant() {
+        return idVariant;
+    }
+
+    public void setIdVariant(String idVariant) {
+        this.idVariant = idVariant;
     }
 
     public int getQuantity() {

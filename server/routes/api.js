@@ -11,6 +11,7 @@ var pCtrl = require("../controllers/product.controller");
 var cartCtrl = require("../controllers/cart.controller");
 var orderCtrl = require("../controllers/order.controller");
 var walletCtrl = require("../controllers/wallet.controller");
+var userFavoriteCtrl = require("../controllers/userFavorite.controller");
 
 // User
 router.post("/account/register", upload.single("image"), accountCtrl.doReg);
@@ -70,12 +71,6 @@ router.post(
   upload.single("image"),
   bannerCtrl.AddBanner
 );
-router.delete(
-  "/banner/sale/delete",
-  mdw.api_auth,
-  mdw.checkRole(["admin"]),
-  bannerCtrl.DeleteBanner
-);
 router.get("/banner/sale/list", bannerCtrl.GetAllBanner);
 
 // Category
@@ -101,10 +96,21 @@ router.get("/category/list", catCtrl.getListCat);
 router.get("/categories/top4", catCtrl.GetTopCategories);
 
 // Product
-router.post("/product/add", upload.single("image"), pCtrl.addProduct);
-router.put("/product/edit/:_id", pCtrl.EditProduct);
-router.delete("/product/delete/:_id", pCtrl.DeleteProduct);
+router.post(
+  "/product/add",
+  mdw.api_auth,
+  upload.single("image"),
+  pCtrl.AddProduct
+);
+router.put(
+  "/product/edit/:_id",
+  mdw.api_auth,
+  upload.single("image"),
+  pCtrl.EditProduct
+);
+router.delete("/product/delete/:_id", mdw.api_auth, pCtrl.DeleteProduct);
 router.get("/product/list", pCtrl.GetListProduct);
+router.get("/product/list/admin", mdw.api_auth, mdw.checkRole(["admin"]), pCtrl.GetAdminProducts);
 router.get("/product/list-by-cat", pCtrl.GetProductByCat);
 router.get("/product/list/top-selling", pCtrl.GetTopSellingProducts);
 router.put(
@@ -113,16 +119,22 @@ router.put(
   pCtrl.UpdateFavorite
 );
 router.get("/product/list/favorite", mdw.api_auth, pCtrl.GetFavoriteProducts);
+router.get("/product/:_id", pCtrl.GetProductDetail);
+
+// User Favorite
+// user_id bắt buộc phải truyền qua query (?user_id=xxx)
+// Ví dụ: GET /api/favorite/list?user_id=xxx hoặc POST /api/favorite/add?user_id=xxx
+router.post("/favorite/add", mdw.api_auth, userFavoriteCtrl.AddFavorite);
+router.delete("/favorite/remove/:product_id", mdw.api_auth, userFavoriteCtrl.RemoveFavorite);
+router.post("/favorite/toggle", mdw.api_auth, userFavoriteCtrl.ToggleFavorite);
+router.get("/favorite/check/:product_id", mdw.api_auth, userFavoriteCtrl.CheckFavorite);
+router.get("/favorite/list", mdw.api_auth, userFavoriteCtrl.GetUserFavorites);
 
 // Cart
 router.post("/cart/add", mdw.api_auth, cartCtrl.addToCart);
-router.put(
-  "/cart/:_id/update/:newQuantity",
-  mdw.api_auth,
-  cartCtrl.UpdateCartQuantity
-);
-router.delete("/cart/delete/:_id", mdw.api_auth, cartCtrl.DeleteCartItem);
-router.get("/getListMyCart/:id_user", cartCtrl.GetListMyCart);
+router.get("/cart/list/:id_user", cartCtrl.getCartList);
+router.put("/cart/update/:_id", mdw.api_auth, cartCtrl.updateCartQuantity);
+router.delete("/cart/delete/:_id", mdw.api_auth, cartCtrl.deleteCartItem);
 
 //router.post('/order/:id_user/place/:address', mdw.api_auth, orderCtrl.PlaceOrder);
 router.post("/order", mdw.api_auth, orderCtrl.PlaceOrder);
@@ -149,5 +161,12 @@ router.get(
 
 // Wallet
 router.post("/wallet/create", mdw.api_auth, walletCtrl.CreateWallet);
+router.post("/wallet/login", mdw.api_auth, walletCtrl.LoginWallet);
+router.get("/wallet/info", mdw.api_auth, walletCtrl.GetWalletInfo);
+router.get("/wallet/balance", mdw.api_auth, walletCtrl.CheckBalance);
+router.post("/wallet/deposit", mdw.api_auth, walletCtrl.Deposit);
+router.post("/wallet/withdraw", mdw.api_auth, walletCtrl.Withdraw);
+router.put("/wallet/change-pin", mdw.api_auth, walletCtrl.ChangePin);
+router.get("/wallet/history", mdw.api_auth, walletCtrl.GetTransactionHistory);
 
 module.exports = router;

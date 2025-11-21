@@ -175,6 +175,10 @@ exports.UpdateUser = async (req, res, next) => {
         typeof is_active === "string" ? is_active === "true" : !!is_active;
     }
 
+    // ✅ Thêm name và address
+    if (name) updateData.name = name;
+    if (address) updateData.address = address;
+
     // ✅ Nếu có file upload
     if (req.file) {
       const fileName = await uploadSingleFile(req.file, "avatars");
