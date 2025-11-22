@@ -1,6 +1,8 @@
 package com.example.closethub;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -164,7 +166,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void GetTopSellingProducts() {
-        apiService.GetTopSellingProducts().enqueue(new Callback<ApiResponse<List<Product>>>() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String idUser = sharedPref.getString("id_user", null);
+        
+        apiService.GetTopSellingProducts(idUser).enqueue(new Callback<ApiResponse<List<Product>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Product>>> call, Response<ApiResponse<List<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -183,7 +188,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void GetListProductByCat(String categoryId) {
-        apiService.getListProductByCat(categoryId).enqueue(new Callback<ApiResponse<List<Product>>>() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String idUser = sharedPref.getString("id_user", null);
+        
+        apiService.getListProductByCat(categoryId, idUser).enqueue(new Callback<ApiResponse<List<Product>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Product>>> call, Response<ApiResponse<List<Product>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -252,11 +260,14 @@ public class HomeFragment extends Fragment {
 
     private void setupIndicator() {
         if (layoutIndicator == null) return;
+        
+        Context context = getContext();
+        if (context == null) return;
 
         layoutIndicator.removeAllViews();
 
         for (int i = 0; i < bannerArrayList.size(); i++) {
-            ImageView imageView = new ImageView(getContext());
+            ImageView imageView = new ImageView(context);
             imageView.setImageResource(
                     i == 0 ? R.drawable.dot_active : R.drawable.dot_inactive
             );
@@ -265,7 +276,7 @@ public class HomeFragment extends Fragment {
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            params.setMargins(8, 0, 8, 0);
+            params.setMargins(0, 0, 0, 0);
 
             imageView.setLayoutParams(params);
             layoutIndicator.addView(imageView);

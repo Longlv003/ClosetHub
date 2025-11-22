@@ -1,4 +1,3 @@
-
 const db = require("./db");
 
 const bannerSchema = new db.mongoose.Schema(

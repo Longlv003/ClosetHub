@@ -35,7 +35,8 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerView
     @Override
     public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
         Banner banner = bannerArrayList.get(position);
-        String imageUrl = "http://10.0.2.2:3000/images/banner/" + banner.getImage();
+
+        String imageUrl = "http://10.0.2.2:3000/images/banners/" + banner.getImage();
         Glide.with(holder.itemView.getContext())
                 .load(imageUrl)
                 .placeholder(R.drawable.ic_placeholder) // ảnh tạm khi đang load

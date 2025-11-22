@@ -3,6 +3,7 @@ package com.example.closethub.models;
 public class CartRequest {
     private String id_user;
     private String id_product;
+    private String id_variant;
     private int quantity;
 
     public String getId_user() {
@@ -19,6 +20,14 @@ public class CartRequest {
 
     public void setId_product(String id_product) {
         this.id_product = id_product;
+    }
+
+    public String getId_variant() {
+        return id_variant;
+    }
+
+    public void setId_variant(String id_variant) {
+        this.id_variant = id_variant;
     }
 
     public int getQuantity() {

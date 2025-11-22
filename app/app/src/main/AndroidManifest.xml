@@ -16,6 +16,18 @@
         android:theme="@style/Theme.Commodity_management"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".PayActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ItemSizeProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ItemColorProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProductDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ItemProductBillActivity"
             android:exported="false" />
         <activity
@@ -26,6 +38,9 @@
             android:exported="false" />
         <activity
             android:name=".WalletLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WalletActivity"
             android:exported="false" />
         <activity
             android:name=".ViewAllProductActivity"

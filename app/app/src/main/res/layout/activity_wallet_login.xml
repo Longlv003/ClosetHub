@@ -1,121 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingHorizontal="24dp"
-    tools:context=".WalletLoginActivity"
-    android:layout_marginHorizontal="24dp">
+    android:fillViewport="true"
+    android:background="@color/white"
+    tools:context=".WalletLoginActivity">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="48dp">
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
 
-        <ImageView
-            android:id="@+id/imgBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/outline_arrow_back_24"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="Back" />
-
-        <TextView
-            android:layout_width="0dp"
+        <!-- Header with Back Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Chào mừng đến với Ví"
-            android:textSize="24sp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="32dp">
+
+            <ImageView
+                android:id="@+id/imgBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/outline_arrow_back_24"
+                android:contentDescription="Back"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+        <!-- Wallet Icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/wallet_icon_background"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💳"
+                    android:textSize="48sp"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Title Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đăng nhập ví điện tử"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:textColor="@color/black"
             android:gravity="center"
-            android:layout_marginStart="16dp" />
+            android:layout_marginBottom="8dp" />
 
-        <!-- Spacer để cân bằng layout -->
-        <View
-            android:layout_width="24dp"
-            android:layout_height="24dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nhập mã PIN 6 chữ số để đăng nhập"
+            android:textSize="15sp"
+            android:textColor="@color/gray_600"
+            android:gravity="center"
+            android:layout_marginBottom="40dp" />
+
+        <!-- PIN Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mã PIN"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxStrokeColor="@color/primary_color"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="2dp"
+            app:boxBackgroundMode="outline"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/primary_color"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtPinHash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberPassword"
+                android:maxLength="6"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:paddingVertical="16dp"
+                android:textColor="@color/black" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- PIN Hint -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mã PIN gồm 6 chữ số"
+            android:textSize="12sp"
+            android:textColor="@color/gray_600"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Login Button -->
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Đăng nhập"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/primary_color"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Forgot PIN -->
+        <TextView
+            android:id="@+id/txtForgotPin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quên mã PIN?"
+            android:textSize="15sp"
+            android:textColor="@color/primary_color"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Create Wallet -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chưa có ví? "
+                android:textColor="#444444"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/txtCreateWallet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tạo ví mới"
+                android:textColor="@color/primary_color"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Title -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Đăng nhập Ví"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:gravity="center"
-        android:layout_marginBottom="8dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Vui lòng nhập mã PIN để tiếp tục"
-        android:textSize="16sp"
-        android:textColor="@color/gray_600"
-        android:gravity="center"
-        android:layout_marginBottom="32dp" />
-
-    <!-- PIN Input -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Mã PIN"
-        app:boxCornerRadiusBottomEnd="12dp"
-        app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusTopEnd="12dp"
-        app:boxCornerRadiusTopStart="12dp"
-        app:boxStrokeColor="@color/primary_color"
-        app:endIconMode="password_toggle"
-        app:endIconTint="@color/primary_color"
-        app:startIconTint="@color/primary_color"
-        android:layout_marginBottom="24dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edtPinHash"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberPassword"
-            android:maxLength="6"
-            android:textSize="18sp"
-            android:letterSpacing="0.1"
-            android:paddingVertical="16dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Login Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Đăng nhập"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:cornerRadius="12dp"
-        app:backgroundTint="@color/primary_color"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Forgot PIN -->
-    <TextView
-        android:id="@+id/txtForgotPin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Quên mã PIN?"
-        android:textSize="14sp"
-        android:textColor="@color/primary_color"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="8dp" />
-
-</LinearLayout>
+</ScrollView>

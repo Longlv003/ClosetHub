@@ -6,6 +6,8 @@ public class Bill {
     private String bill_id;
     private String created_date;
     private double total_amount;
+    private double subtotal;
+    private double shipping_fee;
     private String address;
     private List<Product> products;
 
@@ -31,6 +33,22 @@ public class Bill {
 
     public void setTotal_amount(double total_amount) {
         this.total_amount = total_amount;
+    }
+
+    public double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public double getShipping_fee() {
+        return shipping_fee;
+    }
+
+    public void setShipping_fee(double shipping_fee) {
+        this.shipping_fee = shipping_fee;
     }
 
     public String getAddress() {

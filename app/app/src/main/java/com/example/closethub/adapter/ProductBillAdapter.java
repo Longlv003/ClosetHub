@@ -36,12 +36,32 @@ public class ProductBillAdapter extends RecyclerView.Adapter<ProductBillAdapter.
     @Override
     public void onBindViewHolder(@NonNull PBillViewHolder holder, int position) {
         Product p = productArrayList.get(position);
-        holder.txtName.setText(p.getName());
+        
+        // Hiển thị name với size và color nếu có
+        String nameText = p.getName();
+        if (p.getSize() != null && !p.getSize().isEmpty() && 
+            p.getColor() != null && !p.getColor().isEmpty()) {
+            nameText += " (" + p.getSize() + ", " + p.getColor() + ")";
+        } else if (p.getSize() != null && !p.getSize().isEmpty()) {
+            nameText += " (" + p.getSize() + ")";
+        } else if (p.getColor() != null && !p.getColor().isEmpty()) {
+            nameText += " (" + p.getColor() + ")";
+        }
+        
+        holder.txtName.setText(nameText);
 
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-        holder.txtPrice.setText(formatter.format(p.getPrice()));
-        holder.txtQuantity.setText(String.valueOf(p.getQuantity()));
-        holder.txtAmount.setText(formatter.format(p.getPrice() * p.getQuantity()));
+        
+        // Ưu tiên dùng price từ bill_detail, nếu không có thì dùng min_price
+        double price = (p.getPrice() > 0) ? p.getPrice() : p.getMin_price();
+        int quantity = (p.getQuantity() > 0) ? p.getQuantity() : 1;
+        
+        // Ưu tiên dùng amount từ server, nếu không có thì tính lại
+        double amount = (p.getAmount() > 0) ? p.getAmount() : (price * quantity);
+        
+        holder.txtPrice.setText(formatter.format(price) + " ₫");
+        holder.txtQuantity.setText("x" + quantity);
+        holder.txtAmount.setText(formatter.format(amount) + " ₫");
     }
 
     @Override
