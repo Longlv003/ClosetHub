@@ -393,8 +393,8 @@ exports.GetAllOrders = async (req, res, next) => {
 
       // Lấy thông tin user
       const user = bill.id_user;
-      const userEmail = user ? user.email || "" : "";
-      const userName = user ? user.name || customerName || "" : customerName;
+      const userEmail = user ? (user.email || "") : "";
+      const userName = user ? (user.name || customerName || "") : customerName;
 
       orders.push({
         bill_id: bill._id,
