@@ -70,7 +70,7 @@
           </a>
 
           <a
-            href="/admin"
+            href="/admin/products"
             class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-white"
           >
             <span class="material-symbols-outlined text-xl"> inventory_2 </span>
@@ -139,7 +139,7 @@
             </p>
             <h1 class="text-xl md:text-2xl font-semibold">Thống kê báo cáo doanh thu</h1>
             <p class="text-xs text-slate-500">
-              Xem doanh thu theo ngày/tháng/năm và top sản phẩm bán chạy.
+              Xem doanh thu theo khoảng ngày và top sản phẩm bán chạy.
             </p>
           </div>
 
@@ -157,33 +157,34 @@
         </header>
 
         <div class="px-4 md:px-8 py-6 flex flex-col gap-6">
-          <!-- Period Selector -->
-          <section class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-slate-400">Xem theo:</span>
-              <div class="flex gap-2">
-                <button
-                  id="periodDay"
-                  class="px-4 py-2 rounded-lg border border-slate-800 bg-slate-900/60 text-sm font-medium text-slate-200 hover:bg-slate-800 hover:text-white transition-colors period-btn active"
-                  data-period="day"
-                >
-                  Ngày
-                </button>
-                <button
-                  id="periodMonth"
-                  class="px-4 py-2 rounded-lg border border-slate-800 bg-slate-900/60 text-sm font-medium text-slate-200 hover:bg-slate-800 hover:text-white transition-colors period-btn"
-                  data-period="month"
-                >
-                  Tháng
-                </button>
-                <button
-                  id="periodYear"
-                  class="px-4 py-2 rounded-lg border border-slate-800 bg-slate-900/60 text-sm font-medium text-slate-200 hover:bg-slate-800 hover:text-white transition-colors period-btn"
-                  data-period="year"
-                >
-                  Năm
-                </button>
+          <!-- Date Range Selector -->
+          <section
+            class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4"
+          >
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="text-sm text-slate-400">Chọn khoảng thời gian:</span>
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-slate-400">Từ ngày:</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  class="px-3 py-2 rounded-lg border border-slate-800 bg-slate-900/60 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-slate-400">Đến ngày:</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  class="px-3 py-2 rounded-lg border border-slate-800 bg-slate-900/60 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <button
+                id="applyDateFilter"
+                class="px-4 py-2 rounded-lg bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                Áp dụng
+              </button>
             </div>
           </section>
 
@@ -292,9 +293,9 @@
           user.email || "";
       }
 
-      const periodDayBtn = document.getElementById("periodDay");
-      const periodMonthBtn = document.getElementById("periodMonth");
-      const periodYearBtn = document.getElementById("periodYear");
+      const startDateInput = document.getElementById("startDate");
+      const endDateInput = document.getElementById("endDate");
+      const applyDateFilterBtn = document.getElementById("applyDateFilter");
       const totalRevenueEl = document.getElementById("totalRevenue");
       const totalOrdersEl = document.getElementById("totalOrders");
       const avgOrderValueEl = document.getElementById("avgOrderValue");
@@ -306,8 +307,23 @@
       const sidebarOverlay = document.getElementById("sidebarOverlay");
       const closeSidebarBtn = document.getElementById("closeSidebarBtn");
 
-      let currentPeriod = "day";
       let revenueChart = null;
+
+      // Set default date range (30 days ago to today)
+      const today = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      
+      // Format dates as YYYY-MM-DD
+      const formatDateForInput = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      startDateInput.value = formatDateForInput(thirtyDaysAgo);
+      endDateInput.value = formatDateForInput(today);
 
       // Mobile menu toggle
       function toggleMobileMenu() {
@@ -356,26 +372,35 @@
         });
       }
 
-      function updatePeriodButtons(activePeriod) {
-        document.querySelectorAll(".period-btn").forEach((btn) => {
-          btn.classList.remove("active", "bg-blue-600", "text-white");
-          btn.classList.add("bg-slate-900/60", "text-slate-200");
-        });
-        const activeBtn = document.querySelector(`[data-period="${activePeriod}"]`);
-        if (activeBtn) {
-          activeBtn.classList.add("active", "bg-blue-600", "text-white");
-          activeBtn.classList.remove("bg-slate-900/60", "text-slate-200");
-        }
-      }
-
-      async function loadRevenueStatistics(period) {
+      async function loadRevenueStatistics(startDate, endDate) {
         try {
-          const res = await fetch(`/api/statistics/revenue?period=${period}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          if (!startDate || !endDate) {
+            alert("Vui lòng chọn cả ngày bắt đầu và ngày kết thúc");
+            return;
+          }
+
+          // Validate date range
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          if (start > end) {
+            alert("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+            return;
+          }
+
+          const res = await fetch(
+            `/api/statistics/revenue?start_date=${startDate}&end_date=${endDate}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
           const data = await res.json();
+
+          if (data.msg !== "OK") {
+            alert(data.msg || "Lỗi khi tải thống kê doanh thu");
+            return;
+          }
 
           if (data.data && data.data.summary) {
             const summary = data.data.summary;
@@ -385,7 +410,7 @@
           }
 
           if (data.data && data.data.statistics) {
-            renderRevenueChart(data.data.statistics, period);
+            renderRevenueChart(data.data.statistics);
           }
         } catch (err) {
           console.error("Load revenue statistics error", err);
@@ -393,7 +418,7 @@
         }
       }
 
-      function renderRevenueChart(statistics, period) {
+      function renderRevenueChart(statistics) {
         const ctx = document.getElementById("revenueChart");
         
         if (revenueChart) {
@@ -548,12 +573,21 @@
             </td>
             <td class="px-4 py-3">
               <div class="flex flex-col">
-                ${product.min_price === product.max_price ? `
-                  <span class="text-xs text-slate-100">${formatCurrency(product.min_price || 0)}</span>
-                ` : `
-                  <span class="text-xs text-slate-100">${formatCurrency(product.min_price || 0)}</span>
-                  <span class="text-[10px] text-slate-500">- ${formatCurrency(product.max_price || 0)}</span>
-                `}
+                ${
+                  product.min_price === product.max_price
+                    ? `
+                  <span class="text-xs text-slate-100 font-medium">${formatCurrency(
+                    product.min_price || 0
+                  )}</span>
+                `
+                    : `
+                  <span class="text-xs text-slate-100 font-medium">${formatCurrency(
+                    product.min_price || 0
+                  )} - ${formatCurrency(
+                    product.max_price || 0
+                  )}</span>
+                `
+                }
               </div>
             </td>
           `;
@@ -563,23 +597,24 @@
         topProductCount.textContent = String(products.length);
       }
 
-      // Period button handlers
-      periodDayBtn.addEventListener("click", () => {
-        currentPeriod = "day";
-        updatePeriodButtons("day");
-        loadRevenueStatistics("day");
+      // Date filter button handler
+      applyDateFilterBtn.addEventListener("click", () => {
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+        loadRevenueStatistics(startDate, endDate);
       });
 
-      periodMonthBtn.addEventListener("click", () => {
-        currentPeriod = "month";
-        updatePeriodButtons("month");
-        loadRevenueStatistics("month");
+      // Allow Enter key to apply filter
+      startDateInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          applyDateFilterBtn.click();
+        }
       });
 
-      periodYearBtn.addEventListener("click", () => {
-        currentPeriod = "year";
-        updatePeriodButtons("year");
-        loadRevenueStatistics("year");
+      endDateInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          applyDateFilterBtn.click();
+        }
       });
 
       logoutBtn.addEventListener("click", () => {
@@ -588,9 +623,8 @@
         window.location.href = "/login";
       });
 
-      // Khởi chạy
-      updatePeriodButtons("day");
-      loadRevenueStatistics("day");
+      // Khởi chạy với date range mặc định
+      loadRevenueStatistics(startDateInput.value, endDateInput.value);
       loadTopSellingProducts();
     </script>
   </body>
