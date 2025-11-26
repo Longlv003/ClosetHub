@@ -1,6 +1,8 @@
 const { userModel } = require("../models/account.model");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const { uploadSingleFile } = require("../helpers/upload.helper");
+const { sendMail } = require("../helpers/email.helper");
 
 exports.doLogin = async (req, res, next) => {
   // method luôn là post
@@ -173,6 +175,7 @@ exports.updateUserStatus = async (req, res) => {
   }
 };
 
+<<<<<<< Updated upstream
 exports.GetAllAccount = async (req, res, next) => {
   let dataRes = { msg: "OK" };
   try {
@@ -183,6 +186,83 @@ exports.GetAllAccount = async (req, res, next) => {
     dataRes.msg = error.message;
   }
   res.json(dataRes);
+=======
+exports.requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Vui lòng nhập email" });
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "Email không tồn tại" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expireAt = new Date(Date.now() + 30 * 60 * 1000);
+    user.reset_token = token;
+    user.reset_token_expire = expireAt;
+    await user.save();
+
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+    const resetUrl = `${appUrl}/reset-password?token=${token}`;
+
+    await sendMail({
+      to: email,
+      subject: "Yêu cầu đặt lại mật khẩu",
+      html: `
+        <p>Xin chào ${user.name || ""},</p>
+        <p>Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản ClosetHub. Vui lòng bấm vào liên kết sau để đặt lại mật khẩu. Liên kết chỉ có hiệu lực trong vòng 30 phút.</p>
+        <p><a href="${resetUrl}" target="_blank">Đổi mật khẩu ngay</a></p>
+        <p>Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email.</p>
+        <p>Trân trọng,<br/>Đội ngũ ClosetHub</p>
+      `,
+    });
+
+    return res.status(200).json({
+      message: "Đã gửi email đặt lại mật khẩu. Vui lòng kiểm tra hộp thư.",
+    });
+  } catch (error) {
+    console.error("RequestPasswordReset Error:", error);
+    return res.status(500).json({ error: "Không thể gửi email đặt lại mật khẩu" });
+  }
+};
+
+exports.performPasswordReset = async (req, res) => {
+  try {
+    const { token, newPass } = req.body;
+
+    if (!token || !newPass) {
+      return res.status(400).json({ error: "Thiếu token hoặc mật khẩu mới" });
+    }
+
+    const user = await userModel.findOne({
+      reset_token: token,
+      reset_token_expire: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "Token không hợp lệ hoặc đã hết hạn" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.pass = await bcrypt.hash(newPass, salt);
+    user.reset_token = undefined;
+    user.reset_token_expire = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.",
+    });
+  } catch (error) {
+    console.error("PerformPasswordReset Error:", error);
+    return res.status(500).json({ error: "Không thể đặt lại mật khẩu" });
+  }
+>>>>>>> Stashed changes
 };
 
 exports.UpdateUser = async (req, res, next) => {

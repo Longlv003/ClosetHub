@@ -362,6 +362,23 @@
         });
       }
 
+      function getStatusBadge(status) {
+        const text = status || "Chưa xác định";
+        const normalized = text.toLowerCase();
+        if (normalized.includes("đã")) {
+          return {
+            text,
+            classes:
+              "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border-emerald-500/40",
+          };
+        }
+        return {
+          text,
+          classes:
+            "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium bg-amber-500/10 text-amber-300 border-amber-500/40",
+        };
+      }
+
       function renderOrders() {
         const search = searchInput.value.trim().toLowerCase();
         const dateFilterValue = dateFilter.value;
@@ -426,6 +443,7 @@
           const customerEmail = order.customer?.email || "";
           const productCount = order.products?.length || 0;
           const totalAmount = order.total_amount || 0;
+          const statusBadge = getStatusBadge(order.status);
 
           row.innerHTML = `
             <td class="px-4 py-3">
@@ -447,8 +465,8 @@
               ${formatCurrency(totalAmount)}
             </td>
             <td class="px-4 py-3">
-              <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border-emerald-500/40">
-                Đã đặt hàng
+              <span class="${statusBadge.classes}">
+                ${statusBadge.text}
               </span>
             </td>
             <td class="px-4 py-3 text-right">
@@ -496,6 +514,7 @@
           return;
         }
 
+        const statusBadge = getStatusBadge(order.status);
         modalOrderId.textContent = `Mã đơn: #${billId}`;
         orderDetailContent.innerHTML = `
           <!-- Customer Info -->
@@ -556,6 +575,12 @@
               <div>
                 <p class="text-slate-500 mb-1">Phương thức thanh toán</p>
                 <p class="text-slate-100">${order.payment || "N/A"}</p>
+              </div>
+              <div>
+                <p class="text-slate-500 mb-1">Trạng thái thanh toán</p>
+                <span class="${statusBadge.classes}">
+                  ${statusBadge.text}
+                </span>
               </div>
             </div>
           </div>

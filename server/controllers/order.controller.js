@@ -115,14 +115,26 @@ exports.PlaceOrder = async (req, res, next) => {
       finalTotalAmount
     );
 
-    // XÁC ĐỊNH PHƯƠNG THỨC THANH TOÁN
+    // XÁC ĐỊNH PHƯƠNG THỨC & TRẠNG THÁI THANH TOÁN
     let paymentMethod = "cod"; // Mặc định là COD
+    let paymentStatus = "Chưa thanh toán";
     if (address && address.includes("|")) {
       const parts = address.split("|");
       if (parts.length > 2) {
-        const paymentInfo = parts[2].trim();
-        if (paymentInfo.includes("online") || paymentInfo.includes("Online")) {
+        const paymentInfo = parts[2].trim().toLowerCase();
+        if (
+          paymentInfo.includes("online") ||
+          paymentInfo.includes("chuyển khoản")
+        ) {
           paymentMethod = "online";
+          paymentStatus = "Đã thanh toán";
+        } else if (
+          paymentInfo.includes("tiền mặt") ||
+          paymentInfo.includes("cod") ||
+          paymentInfo.includes("nhận hàng")
+        ) {
+          paymentMethod = "cod";
+          paymentStatus = "Chưa thanh toán";
         }
       }
     }
@@ -170,6 +182,7 @@ exports.PlaceOrder = async (req, res, next) => {
       console.log(
         `Đã trừ ${finalTotalAmount}đ từ ví. Số dư còn lại: ${wallet.balance}đ`
       );
+      paymentStatus = "Đã thanh toán";
     }
 
     // TẠO BILL
@@ -179,6 +192,7 @@ exports.PlaceOrder = async (req, res, next) => {
       created_date: new Date(),
       total_amount: finalTotalAmount, // Bao gồm cả phí vận chuyển
       payment_method: paymentMethod, // Lưu phương thức thanh toán
+      status: paymentStatus,
     });
 
     const savedBill = await newBill.save();
@@ -295,6 +309,11 @@ exports.GetOrderHistory = async (req, res, next) => {
         subtotal: subtotal, // Tổng tiền sản phẩm
         shipping_fee: shippingFee, // Phí vận chuyển
         address: bill.address,
+        status:
+          bill.status ||
+          (bill.payment_method === "online"
+            ? "Đã thanh toán"
+            : "Chưa thanh toán"),
         products: details.map((item) => ({
           product_id: item.id_product._id,
           name: item.id_product.name,
@@ -403,6 +422,11 @@ exports.GetAllOrders = async (req, res, next) => {
         subtotal: subtotal,
         shipping_fee: shippingFee,
         address: bill.address,
+        status:
+          bill.status ||
+          (bill.payment_method === "online"
+            ? "Đã thanh toán"
+            : "Chưa thanh toán"),
         customer: {
           id: user ? user._id : null,
           name: userName,

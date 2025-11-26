@@ -11,6 +11,10 @@ router.get("/login", (req, res) => {
   res.render("login");
 });
 
+router.get("/reset-password", (req, res) => {
+  res.render("reset-password");
+});
+
 // Trang dashboard (trang chủ admin)
 router.get("/admin/dashboard", (req, res) => {
   res.render("admin_dashboard");

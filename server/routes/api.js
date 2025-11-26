@@ -21,6 +21,7 @@ router.post("/account/register", upload.single("image"), accountCtrl.doReg);
 router.post("/account/login", upload.none(), accountCtrl.doLogin);
 router.post("/account/login/web", upload.none(), accountCtrl.doLoginWeb);
 router.post(
+<<<<<<< Updated upstream
   "/account/upload-avatar",
   upload.single("image"),
   accountCtrl.UploadAvatar
@@ -30,6 +31,16 @@ router.get(
   mdw.api_auth,
   mdw.checkRole(["admin", "engineer"]),
   accountCtrl.GetAllAccount
+=======
+  "/account/forgot",
+  upload.none(),
+  accountCtrl.requestPasswordReset
+);
+router.post(
+  "/account/reset-password",
+  upload.none(),
+  accountCtrl.performPasswordReset
+>>>>>>> Stashed changes
 );
 router.put(
   "/account/update/:_id",

@@ -236,27 +236,6 @@
               </div>
             </div>
 
-            <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-xs text-slate-500 mb-1">Tổng doanh thu</p>
-                  <p
-                    class="text-2xl font-semibold text-purple-400"
-                    id="totalRevenue"
-                  >
-                    0 đ
-                  </p>
-                </div>
-                <div
-                  class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10"
-                >
-                  <span
-                    class="material-symbols-outlined text-purple-400 text-2xl"
-                    >payments</span
-                  >
-                </div>
-              </div>
-            </div>
           </section>
 
           <!-- Management Cards -->
@@ -477,7 +456,6 @@
       const totalProductsEl = document.getElementById("totalProducts");
       const totalOrdersEl = document.getElementById("totalOrders");
       const totalCustomersEl = document.getElementById("totalCustomers");
-      const totalRevenueEl = document.getElementById("totalRevenue");
 
       // Mobile menu toggle
       function toggleMobileMenu() {
@@ -517,15 +495,6 @@
         });
       }
 
-      function formatCurrency(v) {
-        const num = Number(v) || 0;
-        return num.toLocaleString("vi-VN", {
-          style: "currency",
-          currency: "VND",
-          maximumFractionDigits: 0,
-        });
-      }
-
       async function loadDashboardStats() {
         try {
           // Load products count
@@ -544,7 +513,7 @@
             console.error("Load products error", err);
           }
 
-          // Load orders count and revenue
+          // Load orders count
           try {
             const ordersRes = await fetch("/api/order/list/admin", {
               headers: {
@@ -555,11 +524,6 @@
             if (Array.isArray(ordersData.data)) {
               totalOrdersEl.textContent =
                 ordersData.data.length.toLocaleString("vi-VN");
-              const totalRevenue = ordersData.data.reduce(
-                (sum, order) => sum + (order.total_amount || 0),
-                0
-              );
-              totalRevenueEl.textContent = formatCurrency(totalRevenue);
             }
           } catch (err) {
             console.error("Load orders error", err);

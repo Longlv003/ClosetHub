@@ -158,15 +158,17 @@
             </div>
 
             <p class="text-gray-600 dark:text-gray-300 mb-3">
-              Nhập email để nhận liên kết đặt lại mật khẩu.
+              Nhập email để nhận liên kết đặt lại mật khẩu (hiệu lực 30 phút).
             </p>
 
-            <input
-              id="forgotEmail"
-              type="email"
-              class="w-full h-12 px-4 rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Nhập email của bạn"
-            />
+            <div class="space-y-3">
+              <input
+                id="forgotEmail"
+                type="email"
+                class="w-full h-12 px-4 rounded-lg border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="Nhập email của bạn"
+              />
+            </div>
 
             <p id="forgotMsg" class="text-sm mt-3"></p>
 
@@ -315,11 +317,14 @@
           const data = await res.json().catch(() => ({}));
 
           if (res.ok) {
-            forgotMsg.textContent = "✔ Email reset mật khẩu đã được gửi!";
+            forgotMsg.textContent =
+              "✔ Đã gửi liên kết đặt lại mật khẩu. Vui lòng kiểm tra email.";
             forgotMsg.classList.remove("text-red-500");
             forgotMsg.classList.add("text-green-500");
+            document.getElementById("forgotEmail").value = "";
           } else {
-            forgotMsg.textContent = data?.message || "Không thể gửi yêu cầu!";
+            forgotMsg.textContent =
+              data?.message || "Không thể gửi yêu cầu đặt lại mật khẩu!";
             forgotMsg.classList.remove("text-green-500");
             forgotMsg.classList.add("text-red-500");
           }

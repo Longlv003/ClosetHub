@@ -21,6 +21,8 @@ const accSchema = new db.mongoose.Schema(
     address: { type: String },
     image: { type: String },
     token: { type: String },
+    reset_token: { type: String },
+    reset_token_expire: { type: Date },
   },
   {
     collection: "accounts",
