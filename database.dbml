@@ -1,0 +1,191 @@
+// ClosetHub Database Schema
+// Generated from MongoDB Models
+
+Project ClosetHub {
+  database_type: 'MongoDB'
+  Note: 'ClosetHub - Ứng dụng Bán Quần Áo'
+}
+
+// ============================================
+// ACCOUNT & USER MANAGEMENT
+// ============================================
+
+Table accounts {
+  _id ObjectId [pk, increment]
+  name String
+  email String [unique, not null]
+  pass String [not null, unique]
+  role String [default: 'user', note: 'user | admin | engineer']
+  is_active Boolean [default: true]
+  has_wallet Boolean [default: false]
+  is_delete Boolean [default: false]
+  phone String
+  address String
+  image String
+  token String
+}
+
+// ============================================
+// PRODUCT MANAGEMENT
+// ============================================
+
+Table categories {
+  _id ObjectId [pk, increment]
+  name String [unique, not null]
+}
+
+Table products {
+  _id ObjectId [pk, increment]
+  productCode String [unique, not null]
+  catID ObjectId [not null]
+  name String [not null]
+  description String
+  created_at Date [default: `new Date()`]
+  updated_at Date [default: `new Date()`]
+  is_deleted Boolean [default: false]
+  deleted_at Date [default: null]
+}
+
+Table product_variant {
+  _id ObjectId [pk, increment]
+  sku String [unique, not null]
+  product_id ObjectId [not null]
+  size String [not null]
+  color String [not null]
+  quantity Number [not null, default: 0]
+  price Number [not null, default: 0]
+  image String[] [note: 'Array of image URLs']
+  is_deleted Boolean [default: false]
+  deleted_at Date [default: null]
+}
+
+Table variant_sales {
+  _id ObjectId [pk, increment]
+  variant_id ObjectId [not null]
+  product_id ObjectId [not null]
+  quantity_sold Number [not null]
+  sale_date Date [not null, default: `Date.now`]
+  bill_id ObjectId [not null]
+  bill_detail_id ObjectId [not null]
+  price Number [not null]
+  size String
+  color String
+  createdAt Date [default: `Date.now`]
+  updatedAt Date [default: `Date.now`]
+  
+  Note: 'Lịch sử bán hàng để thống kê theo thời gian'
+}
+
+// ============================================
+// SHOPPING CART
+// ============================================
+
+Table cart {
+  _id ObjectId [pk, increment]
+  id_user ObjectId [not null]
+  id_product ObjectId [not null]
+  id_variant ObjectId [not null]
+  quantity Number [not null, default: 1]
+  added_date Date [default: `Date.now`]
+}
+
+// ============================================
+// ORDER MANAGEMENT
+// ============================================
+
+Table bill {
+  _id ObjectId [pk, increment]
+  created_date Date [default: `Date.now`]
+  id_user ObjectId [not null]
+  total_amount Number [not null]
+  address String
+  payment_method String [default: 'cod', note: 'cod | online']
+}
+
+Table bill_detail {
+  _id ObjectId [pk, increment]
+  id_product ObjectId
+  id_variant ObjectId
+  id_bill ObjectId
+  quantity Number [not null]
+  price Number [not null]
+  size String
+  color String
+}
+
+// ============================================
+// WALLET & TRANSACTION
+// ============================================
+
+Table wallet {
+  _id ObjectId [pk, increment]
+  id_user ObjectId [unique, not null]
+  wallet_number String [unique, not null]
+  total_deposits Number [not null, default: 0]
+  total_withdrawals Number [not null, default: 0]
+  balance Number [not null, default: 0]
+  pin_hash String [not null, note: 'Hashed PIN (6 digits)']
+  is_active Boolean [default: true]
+  create_date Date [default: `Date.now`]
+  updated_date Date [default: `Date.now`]
+}
+
+Table transaction {
+  _id ObjectId [pk, increment]
+  id_wallet ObjectId [not null]
+  type String [not null, note: 'deposit | withdraw | payment']
+  amount Number [not null]
+  description String [default: '']
+  balance_after Number [not null]
+  created_date Date [default: `Date.now`]
+}
+
+// ============================================
+// USER FAVORITES
+// ============================================
+
+Table user_favorite {
+  _id ObjectId [pk, increment]
+  user_id ObjectId [not null]
+  product_id ObjectId [not null]
+  created_date Date [default: `Date.now`]
+  
+  Note: 'Unique constraint on (user_id, product_id)'
+}
+
+// ============================================
+// BANNER MANAGEMENT
+// ============================================
+
+Table banner_sale {
+  _id ObjectId [pk, increment]
+  name String [not null]
+  image String [not null]
+  created_date Date [default: `Date.now`]
+  updated_date Date [default: `Date.now`]
+  is_delete Boolean [default: false]
+  delete_date Date [default: null]
+}
+
+// ============================================
+// RELATIONSHIPS
+// ============================================
+
+Ref: products.catID > categories._id
+Ref: product_variant.product_id > products._id
+Ref: variant_sales.variant_id > product_variant._id
+Ref: variant_sales.product_id > products._id
+Ref: variant_sales.bill_id > bill._id
+Ref: variant_sales.bill_detail_id > bill_detail._id
+Ref: cart.id_user > accounts._id
+Ref: cart.id_product > products._id
+Ref: cart.id_variant > product_variant._id
+Ref: bill.id_user > accounts._id
+Ref: bill_detail.id_product > products._id
+Ref: bill_detail.id_variant > product_variant._id
+Ref: bill_detail.id_bill > bill._id
+Ref: wallet.id_user > accounts._id
+Ref: transaction.id_wallet > wallet._id
+Ref: user_favorite.user_id > accounts._id
+Ref: user_favorite.product_id > products._id
+
